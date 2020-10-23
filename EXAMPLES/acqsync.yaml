@@ -1,0 +1,11 @@
+---
+foo:
+  src: '/dev/null'
+  dst: /tmp/foo
+bar:
+  src: '/dev/null'
+  dst: /tmp/bar
+baz:
+  src: '/dev/null'
+  dst: /tmp/baz
+...
