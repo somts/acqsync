@@ -2,18 +2,23 @@
 
 '''usage: %prog [options]
 
-Sequentially rsync data acquisition directories to shared storage.
-This script is driven by the contents of /mnt/cruise/CURRENT/.acqsync.conf,
-consisting of source and dest rsync directory pairs, one/line.'''
+Build series of rsync CLI commands, then run them in parallel (but log
+in series). This tool is used to sync data acquisition directories to
+shared storage.
+
+See -T argument for expected default YAML path. Expects a YAML file
+formatted per .yaml files in EXAMPLES dir.
+'''
 
 # CHANGELOG:
 # 2008    fmd   : Initial creation
-# 2009-01 jmeyer: added error checking and ability to comment .acqsync, logging.
+# 2009-01 jmeyer: added error checking and ability to comment .acqsync, logging
 # 2009-02 jmeyer: ported to Python, changed config name to .acqsync.tsv.
 #                 Sorry it's so hacky.  Feel free to improve.
 # 2009-02 ncohen: Refactoring.  De-hacky-izing.
 # 2017-09 jmeyer: pylint, pass 1
 # 2020-10 jmeyer: python2 -> python3
+# 2020-11 jmeyer: PEP8/pylint cleanup, add basic parallelism
 
 import argparse
 import logging
@@ -21,14 +26,18 @@ import logging.handlers
 import os
 import subprocess
 import sys
+import time
 from itertools import chain
+from multiprocessing.dummy import Pool
 from types import SimpleNamespace
 
 import yaml
 
+
 class FatalError(Exception):
     '''Hack our own fatal error class'''
     def __init__(self, errmsg, exception=None):
+        super().__init__()
         self.errmsg = errmsg
         self.exception = exception
 
@@ -37,17 +46,22 @@ class FatalError(Exception):
             return ''.join(self.errmsg, '\n\t', str(self.exception))
         return self.errmsg
 
+
 class ConfigFileSyntaxError(Exception):
     '''Hack our own fatal error class'''
+
 
 class ConfigFileTargetError(FatalError):
     '''Hack our own fatal error class'''
 
+
 class Acqsync:
     '''Class for setting up an acqsync instance'''
-    def __init__(self):
+    def __init__(self, cmdpath='/usr/bin/rsync'):
         self.logger = logging.getLogger('acqsync')
         self.cmds = []
+
+        self.cmdpath = cmdpath
 
         # setup/defaults
         self.conf = SimpleNamespace(
@@ -95,18 +109,21 @@ class Acqsync:
         self.logger.setLevel(logging.DEBUG)
 
         # custom log formatter
-        formatter = logging.Formatter('[%(levelname)s] %(asctime)s %(lineno)d %(message)s')
+        formatter = logging.Formatter(
+            '[%(levelname)s] %(asctime)s %(lineno)d %(message)s')
 
         # RotatingFileHandler logger
         self.conf.rfhandler.setFormatter(formatter)
         self.conf.rfhandler.setLevel(logging.INFO)
         self.logger.addHandler(self.conf.rfhandler)
 
-        # syslog logger -- commented out because it requires editing /etc/syslog.conf
-        #syslogHandler = logging.handlers.SysLogHandler()
-        #syslogHandler.setFormatter(formatter)
-        #syslogHandler.setLevel(logging.ERROR)
-        #self.logger.addHandler(syslogHandler)
+        # syslog logger -- commented out because it requires
+        # editing /etc/syslog.conf
+        #
+        # syslogHandler = logging.handlers.SysLogHandler()
+        # syslogHandler.setFormatter(formatter)
+        # syslogHandler.setLevel(logging.ERROR)
+        # self.logger.addHandler(syslogHandler)
 
         # console logger
         self.conf.consolehandler.setLevel(logging.INFO)
@@ -160,19 +177,25 @@ class Acqsync:
             default='/mnt/cruise/CURRENT/.acqsync.yaml',
             type=str,
             help='targets file to read from')
+        parser.add_argument(
+            '-t', '--threadcount',
+            dest='threadcount',
+            default=16,
+            type=int,
+            help='number of parallel rsync jobs to run')
 
-        group = parser.add_mutually_exclusive_group()
-        group.add_argument(
+        agroup = parser.add_mutually_exclusive_group()
+        agroup.add_argument(
             '-n', '--dry-run',
             action='store_true',
             dest='dry_run',
             help='Conduct a dry run. Sets verbosity debug.')
-        group.add_argument(
+        agroup.add_argument(
             '-d', '--debug',
             action='store_true',
             dest='debug',
             help='Turn on debugging output.')
-        group.add_argument(
+        agroup.add_argument(
             '-q', '--quiet',
             action='store_true',
             dest='quiet',
@@ -184,54 +207,46 @@ class Acqsync:
         for i in ['logfilepath', 'pidfilepath', 'targetsfilepath']:
             setattr(self.conf, i, getattr(self.args, i))
 
-
     def parse_targets_file(self):
         '''Read our targets file for valid src/dst pairs
 
-           Expects a YAML file with format like so:
-           ---
-           echodatafoo:
-             src: rsync://echo-01.ucsd.edu/foo
-             dst: /foo
-           echodatabar:
-             src: rsync://echo-01.ucsd.edu/bar
-             dst: /bar
-           metdata:
-             src: rsync://met.ucsd.edu/data
-             dst: /data
-           ...
+          See top of file for format example.
         '''
         try:
             with open(self.conf.targetsfilepath, 'rb') as cfg:
                 myyaml = yaml.load(cfg, Loader=yaml.FullLoader)
-
-                for modulename, args in myyaml.items():
-                    self.logger.debug('Working on YAML module "%s"', modulename)
-                    target = SimpleNamespace(**args)
-
-                    # Attempt to make parent dir if it does not exist
-                    if not os.path.isdir(os.path.dirname(target.dst)):
-                        self.logger.debug('Creating "%s"', target.dst)
-                        os.makedirs(target.dst)
-
-                    self.logger.debug('rsync source argument: "%s"', target.src)
-                    self.logger.debug('rsync destination argument: "%s"', target.dst)
-
-                    # build cmd using list() + chain() to create a flattened list
-                    cmd = list(chain(
-                        ['/usr/bin/rsync'],
-                        self.conf.rsyncopts,
-                        [target.src, target.dst]
-                    ))
-                    self.logger.debug('rsync constructed command: "%s"', cmd)
-                    self.cmds.append(cmd)
-                    self.logger.debug('Done')
         except IOError as err:
             errmsg = 'Cannot locate or open %s.' % self.conf.targetsfilepath
             raise FatalError(errmsg, err)
         except ValueError as err:
-            errmsg = 'Syntax error in targets file %s.' % self.conf.targetsfilepath
+            errmsg = 'Syntax error in targets file %s.' % \
+                    self.conf.targetsfilepath
             raise FatalError(errmsg, err)
+        else:
+            for modulename, args in myyaml.items():
+                self.logger.debug(
+                    'Processing YAML module "%s"...', modulename)
+                target = SimpleNamespace(**args)
+
+                # Attempt to make parent dir if it does not exist
+                if not os.path.isdir(os.path.dirname(target.dst)):
+                    self.logger.debug('Creating "%s"', target.dst)
+                    os.makedirs(target.dst)
+
+                self.logger.debug('rsync source argument: "%s"', target.src)
+                self.logger.debug(
+                    'rsync destination argument: "%s"', target.dst)
+
+                # build cmd using list() + chain() in order to
+                # create a flattened list
+                cmd = list(chain(
+                    [self.cmdpath],
+                    self.conf.rsyncopts,
+                    [target.src, target.dst]
+                ))
+                self.logger.debug('rsync constructed command: "%s"', cmd)
+                self.cmds.append(cmd)
+                self.logger.debug('Done')
 
     def check_singleton_process(self):
         '''check to see if we're already running. Quit if we are,
@@ -239,7 +254,8 @@ class Acqsync:
 
         self.logger.debug('Checking for previous pid file')
         if os.path.exists(self.conf.pidfilepath):
-            self.logger.debug('Found pidfile from previous run, checking for running process')
+            self.logger.debug(
+                'Found pidfile, checking for running process...')
             with open(self.conf.pidfilepath, 'r') as pidfile:
                 try:
                     # read file and check to see if PID exists
@@ -256,7 +272,7 @@ class Acqsync:
                         self.conf.pidfilepath
                     )
                     self.logger.warning(
-                        'Attempting to cleanup expired PID file, and proceeding.'
+                        'Attempt cleanup of expired PID file, and proceed...'
                     )
                     # cleanup self.conf.pidfilepath and move on
                     os.remove(self.conf.pidfilepath)
@@ -268,7 +284,8 @@ class Acqsync:
             with open(self.conf.pidfilepath, 'w') as pidfile:
                 pidfile.write('%d' % os.getpid())
         except (IOError, PermissionError) as err:
-            self.logger.error('Could not create PID file: %s', self.conf.pidfilepath)
+            self.logger.error(
+                'Could not create PID file: %s', self.conf.pidfilepath)
             self.logger.error(err)
             sys.exit(1)
 
@@ -281,7 +298,8 @@ class Acqsync:
         except (IOError, PermissionError, OSError) as err:
             # cleanup failed, shouldn't get called
             self.logger.debug(err)
-            self.logger.exception('Cleanup failed: Could not remove PID file at exit')
+            self.logger.exception(
+                'Cleanup failed: Could not remove PID file at exit')
 
     def execute_all_syncs(self):
         '''Determine if this is the only acqsync process running, then
@@ -291,41 +309,55 @@ class Acqsync:
         self.logger.info('Acqsync started')
         try:
             try:
-                self.logger.info('Starting sync(s)')
+                btime = time.perf_counter()
+                self.logger.info(
+                    'Starting up to %i parallel sync(s)...',
+                    self.args.threadcount)
 
-                for cmd in self.cmds:
-                    self.execute_sync(cmd)
-                self.logger.info('All syncs completed normally')
+                # Execute subprocesses in parallel, but log the output
+                # and/or errors in series. This allows humans to read
+                # the logs but get datasets copied quicker.
+                threads = Pool(self.args.threadcount)
+                for cmd, out, err, ret in \
+                        threads.imap(_subsync, self.cmds):
+
+                    self.logger.info(
+                        'Execution of rsync COMMAND (%s)...', ' '.join(cmd))
+                    self.logger.debug('rsync STDOUT:')
+                    self.logger.debug(out.decode())
+                    if ret == 0:
+                        self.logger.info('SUCCESS')
+                    else:
+                        self.logger.warning(
+                            'FAILURE: Return code %d\n%s', ret, err.decode())
+
+                self.logger.info(
+                    'All syncs completed in %i seconds',
+                    time.perf_counter() - btime)
             except FatalError as err:
                 self.logger.error(err.errmsg)
         finally:
             self.cleanup_process()
 
-    def execute_sync(self, cmd):
-        '''Execute single rsync job'''
 
-        self.logger.info('BEGIN %s', ' '.join(cmd))
+def _subsync(command):
+    '''Execute single command via subprocess and return results'''
 
-        # execute cmd, log
-        with subprocess.Popen(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        ) as proc:
-            stdout, stderr = proc.communicate()
-            retcode = proc.poll()
+    with subprocess.Popen(
+            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    ) as proc:
+        stdout, stderr = proc.communicate()
+        return_code = proc.poll()
 
-        self.logger.debug('rsync STDOUT:')
-        self.logger.debug(stdout)
+        return command, stdout, stderr, return_code
 
-        if retcode == 0:
-            self.logger.info('SUCCESS')
-        else:
-            self.logger.warning('FAILURE: Return code %d\n%s', retcode, stderr)
 
 def main():
     '''entry point when run from commandline'''
     acqsync = Acqsync()
     acqsync.execute_all_syncs()
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

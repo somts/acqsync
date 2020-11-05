@@ -1,0 +1,2297 @@
+---
+foo000:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo000'
+foo001:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo001'
+foo002:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo002'
+foo003:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo003'
+foo004:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo004'
+foo005:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo005'
+foo006:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo006'
+foo007:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo007'
+foo008:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo008'
+foo009:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo009'
+foo010:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo010'
+foo011:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo011'
+foo012:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo012'
+foo013:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo013'
+foo014:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo014'
+foo015:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo015'
+foo016:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo016'
+foo017:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo017'
+foo018:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo018'
+foo019:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo019'
+foo020:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo020'
+foo021:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo021'
+foo022:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo022'
+foo023:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo023'
+foo024:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo024'
+foo025:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo025'
+foo026:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo026'
+foo027:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo027'
+foo028:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo028'
+foo029:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo029'
+foo030:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo030'
+foo031:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo031'
+foo032:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo032'
+foo033:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo033'
+foo034:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo034'
+foo035:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo035'
+foo036:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo036'
+foo037:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo037'
+foo038:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo038'
+foo039:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo039'
+foo040:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo040'
+foo041:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo041'
+foo042:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo042'
+foo043:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo043'
+foo044:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo044'
+foo045:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo045'
+foo046:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo046'
+foo047:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo047'
+foo048:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo048'
+foo049:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo049'
+foo050:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo050'
+foo051:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo051'
+foo052:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo052'
+foo053:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo053'
+foo054:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo054'
+foo055:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo055'
+foo056:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo056'
+foo057:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo057'
+foo058:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo058'
+foo059:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo059'
+foo060:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo060'
+foo061:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo061'
+foo062:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo062'
+foo063:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo063'
+foo064:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo064'
+foo065:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo065'
+foo066:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo066'
+foo067:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo067'
+foo068:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo068'
+foo069:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo069'
+foo070:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo070'
+foo071:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo071'
+foo072:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo072'
+foo073:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo073'
+foo074:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo074'
+foo075:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo075'
+foo076:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo076'
+foo077:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo077'
+foo078:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo078'
+foo079:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo079'
+foo080:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo080'
+foo081:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo081'
+foo082:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo082'
+foo083:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo083'
+foo084:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo084'
+foo085:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo085'
+foo086:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo086'
+foo087:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo087'
+foo088:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo088'
+foo089:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo089'
+foo090:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo090'
+foo091:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo091'
+foo092:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo092'
+foo093:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo093'
+foo094:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo094'
+foo095:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo095'
+foo096:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo096'
+foo097:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo097'
+foo098:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo098'
+foo099:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo099'
+foo100:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo100'
+foo101:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo101'
+foo102:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo102'
+foo103:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo103'
+foo104:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo104'
+foo105:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo105'
+foo106:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo106'
+foo107:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo107'
+foo108:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo108'
+foo109:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo109'
+foo110:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo110'
+foo111:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo111'
+foo112:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo112'
+foo113:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo113'
+foo114:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo114'
+foo115:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo115'
+foo116:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo116'
+foo117:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo117'
+foo118:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo118'
+foo119:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo119'
+foo120:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo120'
+foo121:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo121'
+foo122:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo122'
+foo123:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo123'
+foo124:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo124'
+foo125:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo125'
+foo126:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo126'
+foo127:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo127'
+foo128:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo128'
+foo129:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo129'
+foo130:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo130'
+foo131:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo131'
+foo132:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo132'
+foo133:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo133'
+foo134:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo134'
+foo135:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo135'
+foo136:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo136'
+foo137:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo137'
+foo138:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo138'
+foo139:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo139'
+foo140:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo140'
+foo141:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo141'
+foo142:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo142'
+foo143:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo143'
+foo144:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo144'
+foo145:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo145'
+foo146:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo146'
+foo147:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo147'
+foo148:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo148'
+foo149:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo149'
+foo150:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo150'
+foo151:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo151'
+foo152:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo152'
+foo153:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo153'
+foo154:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo154'
+foo155:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo155'
+foo156:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo156'
+foo157:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo157'
+foo158:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo158'
+foo159:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo159'
+foo160:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo160'
+foo161:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo161'
+foo162:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo162'
+foo163:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo163'
+foo164:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo164'
+foo165:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo165'
+foo166:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo166'
+foo167:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo167'
+foo168:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo168'
+foo169:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo169'
+foo170:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo170'
+foo171:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo171'
+foo172:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo172'
+foo173:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo173'
+foo174:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo174'
+foo175:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo175'
+foo176:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo176'
+foo177:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo177'
+foo178:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo178'
+foo179:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo179'
+foo180:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo180'
+foo181:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo181'
+foo182:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo182'
+foo183:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo183'
+foo184:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo184'
+foo185:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo185'
+foo186:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo186'
+foo187:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo187'
+foo188:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo188'
+foo189:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo189'
+foo190:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo190'
+foo191:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo191'
+foo192:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo192'
+foo193:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo193'
+foo194:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo194'
+foo195:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo195'
+foo196:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo196'
+foo197:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo197'
+foo198:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo198'
+foo199:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo199'
+foo200:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo200'
+foo201:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo201'
+foo202:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo202'
+foo203:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo203'
+foo204:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo204'
+foo205:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo205'
+foo206:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo206'
+foo207:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo207'
+foo208:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo208'
+foo209:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo209'
+foo210:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo210'
+foo211:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo211'
+foo212:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo212'
+foo213:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo213'
+foo214:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo214'
+foo215:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo215'
+foo216:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo216'
+foo217:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo217'
+foo218:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo218'
+foo219:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo219'
+foo220:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo220'
+foo221:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo221'
+foo222:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo222'
+foo223:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo223'
+foo224:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo224'
+foo225:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo225'
+foo226:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo226'
+foo227:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo227'
+foo228:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo228'
+foo229:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo229'
+foo230:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo230'
+foo231:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo231'
+foo232:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo232'
+foo233:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo233'
+foo234:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo234'
+foo235:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo235'
+foo236:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo236'
+foo237:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo237'
+foo238:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo238'
+foo239:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo239'
+foo240:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo240'
+foo241:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo241'
+foo242:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo242'
+foo243:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo243'
+foo244:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo244'
+foo245:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo245'
+foo246:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo246'
+foo247:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo247'
+foo248:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo248'
+foo249:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo249'
+foo250:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo250'
+foo251:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo251'
+foo252:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo252'
+foo253:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.foo253'
+foo254:  # last module is designed for failure
+  src: '/tmp/dummyfile'
+  dst: '/tmp/acqsynq.example.foo254'
+bar000:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar000'
+bar001:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar001'
+bar002:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar002'
+bar003:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar003'
+bar004:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar004'
+bar005:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar005'
+bar006:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar006'
+bar007:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar007'
+bar008:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar008'
+bar009:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar009'
+bar010:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar010'
+bar011:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar011'
+bar012:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar012'
+bar013:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar013'
+bar014:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar014'
+bar015:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar015'
+bar016:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar016'
+bar017:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar017'
+bar018:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar018'
+bar019:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar019'
+bar020:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar020'
+bar021:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar021'
+bar022:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar022'
+bar023:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar023'
+bar024:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar024'
+bar025:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar025'
+bar026:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar026'
+bar027:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar027'
+bar028:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar028'
+bar029:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar029'
+bar030:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar030'
+bar031:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar031'
+bar032:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar032'
+bar033:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar033'
+bar034:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar034'
+bar035:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar035'
+bar036:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar036'
+bar037:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar037'
+bar038:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar038'
+bar039:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar039'
+bar040:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar040'
+bar041:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar041'
+bar042:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar042'
+bar043:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar043'
+bar044:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar044'
+bar045:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar045'
+bar046:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar046'
+bar047:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar047'
+bar048:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar048'
+bar049:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar049'
+bar050:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar050'
+bar051:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar051'
+bar052:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar052'
+bar053:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar053'
+bar054:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar054'
+bar055:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar055'
+bar056:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar056'
+bar057:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar057'
+bar058:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar058'
+bar059:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar059'
+bar060:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar060'
+bar061:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar061'
+bar062:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar062'
+bar063:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar063'
+bar064:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar064'
+bar065:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar065'
+bar066:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar066'
+bar067:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar067'
+bar068:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar068'
+bar069:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar069'
+bar070:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar070'
+bar071:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar071'
+bar072:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar072'
+bar073:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar073'
+bar074:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar074'
+bar075:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar075'
+bar076:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar076'
+bar077:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar077'
+bar078:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar078'
+bar079:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar079'
+bar080:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar080'
+bar081:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar081'
+bar082:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar082'
+bar083:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar083'
+bar084:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar084'
+bar085:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar085'
+bar086:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar086'
+bar087:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar087'
+bar088:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar088'
+bar089:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar089'
+bar090:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar090'
+bar091:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar091'
+bar092:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar092'
+bar093:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar093'
+bar094:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar094'
+bar095:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar095'
+bar096:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar096'
+bar097:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar097'
+bar098:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar098'
+bar099:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar099'
+bar100:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar100'
+bar101:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar101'
+bar102:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar102'
+bar103:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar103'
+bar104:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar104'
+bar105:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar105'
+bar106:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar106'
+bar107:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar107'
+bar108:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar108'
+bar109:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar109'
+bar110:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar110'
+bar111:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar111'
+bar112:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar112'
+bar113:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar113'
+bar114:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar114'
+bar115:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar115'
+bar116:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar116'
+bar117:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar117'
+bar118:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar118'
+bar119:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar119'
+bar120:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar120'
+bar121:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar121'
+bar122:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar122'
+bar123:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar123'
+bar124:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar124'
+bar125:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar125'
+bar126:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar126'
+bar127:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar127'
+bar128:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar128'
+bar129:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar129'
+bar130:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar130'
+bar131:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar131'
+bar132:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar132'
+bar133:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar133'
+bar134:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar134'
+bar135:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar135'
+bar136:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar136'
+bar137:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar137'
+bar138:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar138'
+bar139:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar139'
+bar140:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar140'
+bar141:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar141'
+bar142:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar142'
+bar143:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar143'
+bar144:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar144'
+bar145:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar145'
+bar146:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar146'
+bar147:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar147'
+bar148:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar148'
+bar149:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar149'
+bar150:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar150'
+bar151:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar151'
+bar152:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar152'
+bar153:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar153'
+bar154:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar154'
+bar155:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar155'
+bar156:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar156'
+bar157:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar157'
+bar158:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar158'
+bar159:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar159'
+bar160:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar160'
+bar161:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar161'
+bar162:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar162'
+bar163:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar163'
+bar164:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar164'
+bar165:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar165'
+bar166:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar166'
+bar167:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar167'
+bar168:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar168'
+bar169:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar169'
+bar170:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar170'
+bar171:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar171'
+bar172:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar172'
+bar173:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar173'
+bar174:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar174'
+bar175:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar175'
+bar176:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar176'
+bar177:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar177'
+bar178:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar178'
+bar179:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar179'
+bar180:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar180'
+bar181:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar181'
+bar182:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar182'
+bar183:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar183'
+bar184:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar184'
+bar185:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar185'
+bar186:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar186'
+bar187:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar187'
+bar188:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar188'
+bar189:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar189'
+bar190:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar190'
+bar191:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar191'
+bar192:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar192'
+bar193:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar193'
+bar194:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar194'
+bar195:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar195'
+bar196:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar196'
+bar197:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar197'
+bar198:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar198'
+bar199:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar199'
+bar200:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar200'
+bar201:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar201'
+bar202:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar202'
+bar203:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar203'
+bar204:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar204'
+bar205:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar205'
+bar206:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar206'
+bar207:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar207'
+bar208:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar208'
+bar209:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar209'
+bar210:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar210'
+bar211:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar211'
+bar212:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar212'
+bar213:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar213'
+bar214:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar214'
+bar215:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar215'
+bar216:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar216'
+bar217:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar217'
+bar218:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar218'
+bar219:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar219'
+bar220:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar220'
+bar221:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar221'
+bar222:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar222'
+bar223:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar223'
+bar224:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar224'
+bar225:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar225'
+bar226:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar226'
+bar227:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar227'
+bar228:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar228'
+bar229:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar229'
+bar230:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar230'
+bar231:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar231'
+bar232:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar232'
+bar233:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar233'
+bar234:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar234'
+bar235:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar235'
+bar236:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar236'
+bar237:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar237'
+bar238:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar238'
+bar239:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar239'
+bar240:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar240'
+bar241:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar241'
+bar242:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar242'
+bar243:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar243'
+bar244:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar244'
+bar245:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar245'
+bar246:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar246'
+bar247:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar247'
+bar248:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar248'
+bar249:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar249'
+bar250:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar250'
+bar251:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar251'
+bar252:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar252'
+bar253:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.bar253'
+bar254:  # last module is designed for failure
+  src: '/tmp/dummyfile'
+  dst: '/tmp/acqsynq.example.bar254'
+baz000:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz000'
+baz001:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz001'
+baz002:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz002'
+baz003:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz003'
+baz004:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz004'
+baz005:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz005'
+baz006:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz006'
+baz007:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz007'
+baz008:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz008'
+baz009:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz009'
+baz010:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz010'
+baz011:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz011'
+baz012:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz012'
+baz013:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz013'
+baz014:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz014'
+baz015:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz015'
+baz016:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz016'
+baz017:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz017'
+baz018:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz018'
+baz019:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz019'
+baz020:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz020'
+baz021:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz021'
+baz022:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz022'
+baz023:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz023'
+baz024:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz024'
+baz025:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz025'
+baz026:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz026'
+baz027:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz027'
+baz028:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz028'
+baz029:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz029'
+baz030:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz030'
+baz031:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz031'
+baz032:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz032'
+baz033:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz033'
+baz034:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz034'
+baz035:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz035'
+baz036:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz036'
+baz037:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz037'
+baz038:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz038'
+baz039:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz039'
+baz040:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz040'
+baz041:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz041'
+baz042:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz042'
+baz043:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz043'
+baz044:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz044'
+baz045:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz045'
+baz046:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz046'
+baz047:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz047'
+baz048:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz048'
+baz049:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz049'
+baz050:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz050'
+baz051:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz051'
+baz052:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz052'
+baz053:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz053'
+baz054:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz054'
+baz055:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz055'
+baz056:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz056'
+baz057:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz057'
+baz058:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz058'
+baz059:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz059'
+baz060:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz060'
+baz061:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz061'
+baz062:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz062'
+baz063:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz063'
+baz064:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz064'
+baz065:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz065'
+baz066:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz066'
+baz067:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz067'
+baz068:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz068'
+baz069:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz069'
+baz070:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz070'
+baz071:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz071'
+baz072:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz072'
+baz073:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz073'
+baz074:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz074'
+baz075:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz075'
+baz076:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz076'
+baz077:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz077'
+baz078:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz078'
+baz079:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz079'
+baz080:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz080'
+baz081:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz081'
+baz082:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz082'
+baz083:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz083'
+baz084:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz084'
+baz085:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz085'
+baz086:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz086'
+baz087:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz087'
+baz088:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz088'
+baz089:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz089'
+baz090:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz090'
+baz091:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz091'
+baz092:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz092'
+baz093:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz093'
+baz094:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz094'
+baz095:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz095'
+baz096:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz096'
+baz097:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz097'
+baz098:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz098'
+baz099:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz099'
+baz100:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz100'
+baz101:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz101'
+baz102:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz102'
+baz103:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz103'
+baz104:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz104'
+baz105:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz105'
+baz106:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz106'
+baz107:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz107'
+baz108:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz108'
+baz109:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz109'
+baz110:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz110'
+baz111:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz111'
+baz112:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz112'
+baz113:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz113'
+baz114:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz114'
+baz115:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz115'
+baz116:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz116'
+baz117:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz117'
+baz118:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz118'
+baz119:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz119'
+baz120:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz120'
+baz121:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz121'
+baz122:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz122'
+baz123:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz123'
+baz124:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz124'
+baz125:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz125'
+baz126:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz126'
+baz127:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz127'
+baz128:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz128'
+baz129:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz129'
+baz130:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz130'
+baz131:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz131'
+baz132:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz132'
+baz133:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz133'
+baz134:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz134'
+baz135:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz135'
+baz136:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz136'
+baz137:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz137'
+baz138:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz138'
+baz139:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz139'
+baz140:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz140'
+baz141:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz141'
+baz142:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz142'
+baz143:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz143'
+baz144:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz144'
+baz145:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz145'
+baz146:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz146'
+baz147:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz147'
+baz148:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz148'
+baz149:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz149'
+baz150:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz150'
+baz151:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz151'
+baz152:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz152'
+baz153:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz153'
+baz154:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz154'
+baz155:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz155'
+baz156:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz156'
+baz157:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz157'
+baz158:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz158'
+baz159:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz159'
+baz160:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz160'
+baz161:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz161'
+baz162:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz162'
+baz163:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz163'
+baz164:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz164'
+baz165:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz165'
+baz166:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz166'
+baz167:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz167'
+baz168:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz168'
+baz169:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz169'
+baz170:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz170'
+baz171:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz171'
+baz172:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz172'
+baz173:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz173'
+baz174:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz174'
+baz175:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz175'
+baz176:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz176'
+baz177:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz177'
+baz178:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz178'
+baz179:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz179'
+baz180:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz180'
+baz181:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz181'
+baz182:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz182'
+baz183:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz183'
+baz184:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz184'
+baz185:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz185'
+baz186:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz186'
+baz187:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz187'
+baz188:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz188'
+baz189:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz189'
+baz190:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz190'
+baz191:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz191'
+baz192:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz192'
+baz193:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz193'
+baz194:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz194'
+baz195:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz195'
+baz196:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz196'
+baz197:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz197'
+baz198:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz198'
+baz199:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz199'
+baz200:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz200'
+baz201:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz201'
+baz202:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz202'
+baz203:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz203'
+baz204:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz204'
+baz205:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz205'
+baz206:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz206'
+baz207:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz207'
+baz208:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz208'
+baz209:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz209'
+baz210:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz210'
+baz211:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz211'
+baz212:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz212'
+baz213:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz213'
+baz214:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz214'
+baz215:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz215'
+baz216:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz216'
+baz217:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz217'
+baz218:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz218'
+baz219:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz219'
+baz220:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz220'
+baz221:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz221'
+baz222:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz222'
+baz223:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz223'
+baz224:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz224'
+baz225:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz225'
+baz226:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz226'
+baz227:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz227'
+baz228:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz228'
+baz229:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz229'
+baz230:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz230'
+baz231:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz231'
+baz232:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz232'
+baz233:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz233'
+baz234:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz234'
+baz235:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz235'
+baz236:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz236'
+baz237:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz237'
+baz238:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz238'
+baz239:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz239'
+baz240:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz240'
+baz241:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz241'
+baz242:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz242'
+baz243:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz243'
+baz244:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz244'
+baz245:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz245'
+baz246:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz246'
+baz247:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz247'
+baz248:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz248'
+baz249:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz249'
+baz250:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz250'
+baz251:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz251'
+baz252:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz252'
+baz253:
+  src: '/dev/null'
+  dst: '/tmp/acqsynq.example.baz253'
+baz254:  # last module is designed for failure
+  src: '/tmp/dummyfile'
+  dst: '/tmp/acqsynq.example.baz254'
+...
