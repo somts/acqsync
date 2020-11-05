@@ -332,7 +332,7 @@ class Acqsync:
                             'FAILURE: Return code %d\n%s', ret, err.decode())
 
                 self.logger.info(
-                    'All syncs completed in %i seconds',
+                    'All syncs completed in %0.6f seconds',
                     time.perf_counter() - btime)
             except FatalError as err:
                 self.logger.error(err.errmsg)
