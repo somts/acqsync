@@ -343,8 +343,9 @@ class Acqsync:
 def _subsync(command):
     '''Execute single command via subprocess and return results'''
 
+    cmd = ' '.join(command)
     with subprocess.Popen(
-            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     ) as proc:
         stdout, stderr = proc.communicate()
         return_code = proc.poll()
