@@ -1,0 +1,11 @@
+---
+foo:
+  src: '/dev/nul*'  # wildcard needs to work
+  dst: /tmp/foo
+bar:
+  src: '/dev/{zero,null}'  # squiggly brace needs to work
+  dst: /tmp/
+baz:
+  src: /dev/null
+  dst: /tmp/baz
+...
