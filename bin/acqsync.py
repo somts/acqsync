@@ -228,6 +228,16 @@ class Acqsync:
                     'Processing YAML module "%s"...', modulename)
                 target = SimpleNamespace(**args)
 
+                try:
+                    if target.enabled is False:
+                        self.logger.warning(
+                            '%s set to disabled. Skipping.', modulename)
+                        continue
+                except AttributeError:
+                    self.logger.debug(
+                        '%s has no "enabled" parameter. Default enabled.',
+                        modulename)
+
                 # Attempt to make parent dir if it does not exist
                 if not os.path.isdir(os.path.dirname(target.dst)):
                     self.logger.debug('Creating "%s"', target.dst)

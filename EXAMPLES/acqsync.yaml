@@ -1,8 +1,10 @@
 ---
 foo:
+  enabled: true
   src: '/dev/null'
   dst: /tmp/foo
 bar:
+  enabled: false
   src: '/dev/null'
   dst: /tmp/bar
 baz:
