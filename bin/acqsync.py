@@ -174,7 +174,7 @@ class Acqsync:
         parser.add_argument(
             '-T', '--targetsfilepath',
             dest='targetsfilepath',
-            default='/mnt/cruise/CURRENT/.acqsync.yaml',
+            default='/share/cruise/CURRENT/.acqsync.yaml',
             type=str,
             help='targets file to read from')
         parser.add_argument(
