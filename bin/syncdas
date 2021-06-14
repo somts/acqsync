@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+
+'''usage: %prog [options]
+
+Build series of rsync CLI commands per the Acqsync class.
+This tool is used to sync data acquisition directories to shared
+storage, and is the main warpper for executing.
+
+EXAMPLE DRY RUN:
+./bin/syncdas --dry-run \
+        -L /tmp/acqsync.log \
+        -P /tmp/acqsync.pid \
+        -T etc/acqsync.example.yaml
+'''
+# CHANGELOG
+# 2021-06:jmeyer: Standalone execution wrapper; logic to lib
+
+import os
+import sys
+try:
+    from acqsync import Acqsync
+except (ModuleNotFoundError, NameError):
+    # Append our path with this repo's lib dir
+    sys.path.append(
+        os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                     '../lib/python3/dist-packages')))
+    from acqsync import Acqsync
+
+
+def main():
+    '''entry point when run from commandline'''
+    sync = Acqsync()
+    if sync.conf.cruise.sync_run is True:
+        sync.execute_all_syncs()
+    else:
+        sync.logger.info(
+            'Cruise sync_run is disabled in %s. Not an error. Exit.',
+            sync.conf.targetsfilepath)
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

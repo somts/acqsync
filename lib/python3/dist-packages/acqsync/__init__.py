@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-'''usage: %prog [options]
+'''Acqsync lib file
 
 Build series of rsync CLI commands, then run them in parallel (but log
 in series). This tool is used to sync data acquisition directories to
@@ -9,7 +7,6 @@ shared storage.
 See -T argument for expected default YAML path. Expects a YAML file
 formatted per .yaml files in EXAMPLES dir.
 '''
-
 # CHANGELOG:
 # 2008    fmd   : Initial creation
 # 2009-01 jmeyer: added error checking and ability to comment .acqsync, logging
@@ -19,11 +16,19 @@ formatted per .yaml files in EXAMPLES dir.
 # 2017-09 jmeyer: pylint, pass 1
 # 2020-10 jmeyer: python2 -> python3
 # 2020-11 jmeyer: PEP8/pylint cleanup, add basic parallelism
+# 2021-06 jmeyer: Lotsa hackery.  Add .gitignore so that we can support
+#                 .pyvenv. Enhance YAML options after deploying on
+#                 ships. Allow jinja2 syntax in src/dst args. Use
+#                 python to render date globs based on cruise metadata.
+#                 Move Acqsync class to lib and make the executable a
+#                 lightweight wrapper.
 
 import argparse
+import datetime
 import logging
 import logging.handlers
 import os
+import re
 import subprocess
 import sys
 import time
@@ -31,28 +36,10 @@ from itertools import chain
 from multiprocessing.dummy import Pool
 from types import SimpleNamespace
 
+from jinja2 import Template
 import yaml
 
-
-class FatalError(Exception):
-    '''Hack our own fatal error class'''
-    def __init__(self, errmsg, exception=None):
-        super().__init__()
-        self.errmsg = errmsg
-        self.exception = exception
-
-    def __str__(self):
-        if self.exception:
-            return ''.join(self.errmsg, '\n\t', str(self.exception))
-        return self.errmsg
-
-
-class ConfigFileSyntaxError(Exception):
-    '''Hack our own fatal error class'''
-
-
-class ConfigFileTargetError(FatalError):
-    '''Hack our own fatal error class'''
+import acqsync.error
 
 
 class Acqsync:
@@ -64,21 +51,23 @@ class Acqsync:
         self.cmdpath = cmdpath
 
         # setup/defaults
+        # rsyncopts may be overridden by YAML, later, but we will set
+        # up sensible defaults.
         self.conf = SimpleNamespace(
             consolehandler=logging.StreamHandler(),
             rsyncopts=[
-                '-a',
-                '-x',
-                '--no-p',
-                '--no-g',
-                '--exclude=.DS_Store',
-                '--exclude=Thumbs.db',
-                '--exclude=Picasa.ini',
-                '--exclude="._*"',
-                '--exclude=".Trash*/"',
-                '--exclude=.TemporaryItems/',
-                '--timeout=60',
+                '--archive',
                 '--chmod=Dg+st,ugo+rx,Fo-w,+X'
+                '--exclude=".Trash*/"',
+                '--exclude="._*"',
+                '--exclude=.DS_Store',
+                '--exclude=.TemporaryItems/',
+                '--exclude=Picasa.ini',
+                '--exclude=Thumbs.db',
+                '--no-g',
+                '--no-p',
+                '--one-file-system',
+                '--timeout=60',
             ],
         )
 
@@ -216,16 +205,59 @@ class Acqsync:
             with open(self.conf.targetsfilepath, 'rb') as cfg:
                 myyaml = yaml.load(cfg, Loader=yaml.FullLoader)
         except IOError as err:
-            errmsg = 'Cannot locate or open %s.' % self.conf.targetsfilepath
-            raise FatalError(errmsg, err)
+            raise acqsync.error.FatalError(
+                'Cannot locate or open %s.' % self.conf.targetsfilepath, err)
         except ValueError as err:
-            errmsg = 'Syntax error in targets file %s.' % \
-                    self.conf.targetsfilepath
-            raise FatalError(errmsg, err)
+            raise acqsync.error.ConfigFileSyntaxError(
+                'Syntax error in targets file %s.' % self.conf.targetsfilepath,
+                err)
         else:
-            for modulename, args in myyaml.items():
+            # YAML may override our default rsync path
+            if 'path' in myyaml['config']['rsync']:
+                self.conf.cmdpath = myyaml['config']['rsync']['path']
+                self.logger.warning('rsync executable path set to %s, per %s.',
+                                    self.conf.cmdpath,
+                                    self.conf.targetsfilepath)
+            # YAML may override our default rsync options
+            if 'options' in myyaml['config']['rsync']:
+                self.conf.rsyncopts = Acqsync._parse_rsyncopts(
+                        myyaml['config']['rsync']['options'])
+                self.logger.warning('rsync options set to %s, per %s.',
+                                    self.conf.rsyncopts,
+                                    self.conf.targetsfilepath)
+
+            # Convert YAML to SimpleNamespaces. Process required keys
+            for i in ['config', 'items']:
+                try:
+                    if i == 'config':  # Process subkeys in config
+                        for j in ['cruise', 'rsync']:
+                            if j == 'cruise':
+                                setattr(self.conf, j,
+                                        self._parse_cruise(myyaml[i][j]))
+                            else:
+                                setattr(self.conf, j,
+                                        SimpleNamespace(**myyaml[i][j]))
+                            self.logger.debug('%s config = %s',
+                                              j, getattr(self.conf, j))
+                    else:
+                        setattr(self.conf, i, SimpleNamespace(**myyaml[i]))
+                        self.logger.debug('%s config = %s',
+                                          i, getattr(self.conf, i))
+                except AttributeError as err:
+                    raise acqsync.error.ConfigFileSyntaxError(
+                        'root key "%s" is not defined in %s! Exit.' %
+                        (i, self.conf.targetsfilepath), err)
+
+            # Do not run if disabled
+            if self.conf.cruise.sync_run is False:
+                self.logger.info(
+                    'Cruise sync_run is disabled in %s. Not an error. Exit.',
+                    self.conf.targetsfilepath)
+                sys.exit(0)
+
+            for modulename, args in self.conf.items.__dict__.items():
                 self.logger.debug(
-                    'Processing YAML module "%s"...', modulename)
+                    'Processing item "%s"...', modulename)
                 target = SimpleNamespace(**args)
 
                 try:
@@ -238,6 +270,27 @@ class Acqsync:
                         '%s has no "enabled" parameter. Default enabled.',
                         modulename)
 
+                # set module-specific rsync options
+                try:
+                    if not isinstance(target.rsync_options, dict):
+                        raise acqsync.error.ConfigFileSyntaxError(
+                            'rsync_options in module "%s" (%s) ' %
+                            (modulename, self.conf.targetsfilepath) +
+                            'must be type dict, got %s' %
+                            type(target.rsync_options))
+                except AttributeError:
+                    target.rsync_options = {}
+
+                # Run each module through Jinja2 templating engine
+                srctemplate = Template(target.src)
+                dsttemplate = Template(target.dst)
+                target.src = srctemplate.render(
+                    cruise=self.conf.cruise,
+                    rsync_config=self.conf.rsync)
+                target.dst = dsttemplate.render(
+                    cruise=self.conf.cruise,
+                    rsync_config=self.conf.rsync)
+
                 # Attempt to make parent dir if it does not exist
                 if not os.path.isdir(os.path.dirname(target.dst)):
                     self.logger.debug('Creating "%s"', target.dst)
@@ -248,13 +301,16 @@ class Acqsync:
                     'rsync destination argument: "%s"', target.dst)
 
                 # build cmd using list() + chain() in order to
-                # create a flattened list
-                cmd = list(chain(
-                    [self.cmdpath],
-                    self.conf.rsyncopts,
+                # create a flattened list. We then join on space specifically
+                # because shell=True in subprocess (which requires this).
+                cmd = ' '.join(list(chain(
+                    [self.conf.rsync.path],
+                    sorted(Acqsync._parse_rsyncopts(self.conf.rsync.options) +
+                           Acqsync._parse_rsyncopts(target.rsync_options)),
                     [target.src, target.dst]
-                ))
-                self.logger.debug('rsync constructed command: "%s"', cmd)
+                )))
+                # No need to log here as we will see this later
+                # self.logger.debug('rsync constructed command: "%s"', cmd)
                 self.cmds.append(cmd)
                 self.logger.debug('Done')
 
@@ -328,47 +384,93 @@ class Acqsync:
                 # and/or errors in series. This allows humans to read
                 # the logs but get datasets copied quicker.
                 threads = Pool(self.args.threadcount)
-                for cmd, out, err, ret in \
-                        threads.imap(_subsync, self.cmds):
+                for cmd, stdout, stderr, retcode in \
+                        threads.imap(Acqsync._subsync, self.cmds):
 
-                    self.logger.info(
-                        'Execution of rsync COMMAND (%s)...', ' '.join(cmd))
+                    self.logger.info('Execution of rsync COMMAND (%s)...', cmd)
                     self.logger.debug('rsync STDOUT:')
-                    self.logger.debug(out.decode())
-                    if ret == 0:
+                    self.logger.debug(stdout.decode())
+                    if retcode == 0:
                         self.logger.info('SUCCESS')
                     else:
-                        self.logger.warning(
-                            'FAILURE: Return code %d\n%s', ret, err.decode())
+                        self.logger.warning('FAILURE: Return code %d\n%s',
+                                            retcode, stderr.decode())
 
-                self.logger.info(
-                    'All syncs completed in %0.6f seconds',
-                    time.perf_counter() - btime)
-            except FatalError as err:
-                self.logger.error(err.errmsg)
+                self.logger.info('All syncs completed in %0.6f seconds',
+                                 time.perf_counter() - btime)
+            except acqsync.error.FatalError as err:
+                self.logger.error(err)
         finally:
             self.cleanup_process()
 
+    def _parse_cruise(self, cdict,
+                      params=['begin', 'end', 'name', 'sync_run'],
+                      pattern='^[A-Z]{2,3}([0-9]{4}|port)$'):
+        '''confirm cruise metadata settings follow a certain schema'''
+        keys = sorted(cdict.keys())
 
-def _subsync(command):
-    '''Execute single command via subprocess and return results'''
+        # Confirm that we received only the cruise parameters we expect.
+        if keys != params:
+            self.logger.error(
+                'Supported Cruise parameters are %s. Got %s',
+                params, keys)
+            sys.exit(10)
 
-    cmd = ' '.join(command)
-    with subprocess.Popen(
-            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    ) as proc:
-        stdout, stderr = proc.communicate()
-        return_code = proc.poll()
+        for i in params:
+            try:
+                if i in ['begin', 'end']:
+                    # Convert date to datetime.date type.
+                    # Typically, ISO-style dates get automagically
+                    # converted when the YAML is imported, but we
+                    # ensure it, here.
+                    if not isinstance(cdict[i], datetime.date):
+                        cdict[i] = datetime.date('-'.split(cdict[i]))
+                elif i == 'name':
+                    # Ensure our cruise name matches a defined pattern
+                    # EG RRport, HLY1234, SP4321
+                    match = re.search(pattern, cdict[i])
+                    if not match:
+                        self.logger.error(
+                            'Cruise name "%s" must match pattern "%s". Exit.',
+                            cdict[i], pattern)
+                        sys.exit(12)
+                elif i == 'sync_run':
+                    # Ensure sync_run is defined and a bool
+                    if not isinstance(cdict[i], bool):
+                        self.logger.error(
+                            'Cruise sync_run must be defined and a boolean')
+                        sys.exit(13)
+            except KeyError:
+                self.logger.error(
+                    'Required cruise parameter "%s" is not defined. Exit.', i)
+                sys.exit(11)
 
-        return command, stdout, stderr, return_code
+        return SimpleNamespace(**cdict)
 
+    @staticmethod
+    def _parse_rsyncopts(opts_dict):
+        '''convert a dict of rsync options to an array of rsync CLI options'''
+        opts_list = []
 
-def main():
-    '''entry point when run from commandline'''
-    acqsync = Acqsync()
-    acqsync.execute_all_syncs()
-    sys.exit(0)
+        for key, val in opts_dict.items():
+            if isinstance(val, bool) and val is True:
+                opts_list.append('--%s' % key)
+            elif isinstance(val, list):
+                for i in val:
+                    opts_list.append('--%s="%s"' % (key, i))
+            else:
+                opts_list.append('--%s="%s"' % (key, val))
 
+        return opts_list
 
-if __name__ == "__main__":
-    main()
+    @staticmethod
+    def _subsync(command):
+        '''Execute single command via subprocess and return results'''
+
+        with subprocess.Popen(command, shell=True,
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE) as proc:
+            stdout, stderr = proc.communicate()
+            return_code = proc.poll()
+
+            return command, stdout, stderr, return_code

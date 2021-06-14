@@ -1,0 +1,48 @@
+# This file serves as an example file that can be copied to
+# acqsync.yaml as the basis for getting started.  It can also
+# be handed as an argument to bin/acsqync to test function.
+# The outcome will be copying /dev/null to /tmp a few times.
+---
+config:
+  cruise:
+    name: XXport
+    begin: 2021-01-01  # ISO format date
+    end: 2021-01-31    # ISO format date
+    sync_run: true     # false to disable sync of all items
+  rsync:
+    path: /usr/bin/rsync
+    # Options will expand to rsync command-line options.
+    # Only --option (not -o) is supported.
+    # Behavior depends on data type:
+    #   Boolean         : --key
+    #   Array/List      : --key="arr[0]" [--key="arr[1]" --key="arr[2]" etc]
+    #   String/Int/Float: --key="value"
+    options:
+      archive: true
+      chmod: 'Dg+st,ugo+rx,Fo-w,+X'
+      exclude:
+        - '.Trash*/'
+        - '._*'
+        - .DS_Store
+        - .TemporaryItems/
+        - Picasa.ini
+        - Thumbs.db
+      no-g: true
+      no-p: true
+      one-file-system: true
+      timeout: 60
+items:  # items that python will create rsync-in-a-shell threads for.
+  foo:
+    enabled: true
+    src: '/dev/null'
+    dst: '/tmp/{{ cruise.name }}'
+  bar:
+    enabled: false
+    src: '/dev/null'
+    dst: '/tmp/{{ cruise.name }}'
+  baz:
+    # implicit enabled
+    src: '/dev/null'
+    dst: /tmp/baz
+    rsync_options: {exclude: baz/}
+...
