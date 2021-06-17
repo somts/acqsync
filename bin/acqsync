@@ -18,25 +18,24 @@ EXAMPLE DRY RUN:
 import os
 import sys
 try:
-    from acqsync import Acqsync
+    from dassync import DASSync
 except (ModuleNotFoundError, NameError):
     # Append our path with this repo's lib dir
     sys.path.append(
         os.path.abspath(os.path.join(os.path.dirname(__file__),
                                      '../lib/python3/dist-packages')))
-    from acqsync import Acqsync
+    from dassync import DASSync
 
 
 def main():
     '''entry point when run from commandline'''
-    sync = Acqsync()
+    sync = DASSync()
     if sync.conf.cruise.sync_run is True:
-        sync.execute_all_syncs()
-    else:
+        sync.run_syncs()
+    else:  # Do not run if disabled
         sync.logger.info(
             'Cruise sync_run is disabled in %s. Not an error. Exit.',
             sync.conf.targetsfilepath)
-    sys.exit(0)
 
 
 if __name__ == "__main__":
