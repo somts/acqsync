@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+'''DASSync module to generate errors and exceptions'''
 
 
 class FatalError(Exception):

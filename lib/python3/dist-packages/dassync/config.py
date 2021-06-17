@@ -37,35 +37,35 @@ class DSConfig:
     #  sed -e 's/^--//' -e 's/=.\+$//' -e "s/^/    '/" -e "s/$/',/" | \
     #  sort
     RSYNC_OPTIONS_VALID = [
-      '8-bit-output', 'acls', 'address', 'append', 'append-verify',
-      'archive', 'backup', 'backup-dir', 'block-size', 'blocking-io',
-      'bwlimit', 'checksum', 'checksum-choice', 'checksum-seed',
-      'chmod', 'chown', 'compare-dest', 'compress', 'compress-level',
-      'contimeout', 'copy-dest', 'copy-dirlinks', 'copy-links',
-      'copy-unsafe-links', 'cvs-exclude', 'debug', 'del',
-      'delay-updates', 'delete', 'delete-after', 'delete-before',
-      'delete-delay', 'delete-during', 'delete-excluded',
-      'delete-missing-args', 'devices', 'dirs', 'dry-run', 'exclude',
-      'exclude-from', 'executability', 'existing', 'fake-super',
-      'files-from', 'filter', 'force', 'from0', 'fuzzy', 'group',
-      'groupmap', 'hard-links', 'help', 'human-readable', 'iconv',
-      'ignore-errors', 'ignore-existing', 'ignore-missing-args',
-      'ignore-times', 'include', 'include-from', 'info', 'inplace',
-      'ipv4', 'ipv6', 'itemize-changes', 'keep-dirlinks', 'link-dest',
-      'links', 'list-only', 'log-file', 'log-file-format',
-      'max-delete', 'max-size', 'min-size', 'modify-window',
-      'msgs2stderr', 'munge-links', 'no-implied-dirs', 'no-motd',
-      'noatime', 'numeric-ids', 'omit-dir-times', 'omit-link-times',
-      'one-file-system', 'only-write-batch', 'out-format', 'outbuf',
-      'owner', 'partial', 'partial-dir', 'password-file', 'perms',
-      'port', 'preallocate', 'progress', 'protect-args', 'protocol',
-      'prune-empty-dirs', 'quiet', 'read-batch', 'recursive',
-      'relative', 'remote-option', 'remove-source-files', 'rsh',
-      'rsync-path', 'safe-links', 'size-only', 'skip-compress',
-      'sockopts', 'sparse', 'specials', 'stats', 'stop-at', 'suffix',
-      'super', 'temp-dir', 'time-limit', 'timeout', 'times', 'update',
-      'usermap', 'verbose', 'version', 'whole-file', 'write-batch',
-      'xattrs']
+        '8-bit-output', 'acls', 'address', 'append', 'append-verify',
+        'archive', 'backup', 'backup-dir', 'block-size', 'blocking-io',
+        'bwlimit', 'checksum', 'checksum-choice', 'checksum-seed',
+        'chmod', 'chown', 'compare-dest', 'compress', 'compress-level',
+        'contimeout', 'copy-dest', 'copy-dirlinks', 'copy-links',
+        'copy-unsafe-links', 'cvs-exclude', 'debug', 'del',
+        'delay-updates', 'delete', 'delete-after', 'delete-before',
+        'delete-delay', 'delete-during', 'delete-excluded',
+        'delete-missing-args', 'devices', 'dirs', 'dry-run', 'exclude',
+        'exclude-from', 'executability', 'existing', 'fake-super',
+        'files-from', 'filter', 'force', 'from0', 'fuzzy', 'group',
+        'groupmap', 'hard-links', 'help', 'human-readable', 'iconv',
+        'ignore-errors', 'ignore-existing', 'ignore-missing-args',
+        'ignore-times', 'include', 'include-from', 'info', 'inplace',
+        'ipv4', 'ipv6', 'itemize-changes', 'keep-dirlinks', 'link-dest',
+        'links', 'list-only', 'log-file', 'log-file-format',
+        'max-delete', 'max-size', 'min-size', 'modify-window',
+        'msgs2stderr', 'munge-links', 'no-implied-dirs', 'no-motd',
+        'noatime', 'numeric-ids', 'omit-dir-times', 'omit-link-times',
+        'one-file-system', 'only-write-batch', 'out-format', 'outbuf',
+        'owner', 'partial', 'partial-dir', 'password-file', 'perms',
+        'port', 'preallocate', 'progress', 'protect-args', 'protocol',
+        'prune-empty-dirs', 'quiet', 'read-batch', 'recursive',
+        'relative', 'remote-option', 'remove-source-files', 'rsh',
+        'rsync-path', 'safe-links', 'size-only', 'skip-compress',
+        'sockopts', 'sparse', 'specials', 'stats', 'stop-at', 'suffix',
+        'super', 'temp-dir', 'time-limit', 'timeout', 'times', 'update',
+        'usermap', 'verbose', 'version', 'whole-file', 'write-batch',
+        'xattrs']
 
     # Append 'no-' options to above and convert to a sorted tuple.
     # Almost all long strings in rsync can be prepended with 'no-' to
@@ -96,7 +96,14 @@ class DSConfig:
         self.paths = SimpleNamespace()
 
         # Continue setup, potentially based on user input
-        self.__conf_args()
+        # Update self intially with user args. Values set here may
+        # subsequently be overridden by YAML, however what is set
+        # here controls what YAML file we open.
+        for key, val in self.__conf_args().__dict__.items():
+            if key.endswith('file'):
+                setattr(self.paths, key, val)
+            else:
+                setattr(self, key, val)
 
         # Allow YAML to override/augment user options
         self.yaml = self.__open_yaml()
@@ -211,15 +218,15 @@ class DSConfig:
             dest='critical_time',
             type=int,
             help='Generate an error if all syncs take longer than a ' +
-                 'certain amount of seconds (EG 900), which can create ' +
-                 'email in some cron setups. Set to 0 to disable.')
+            'certain amount of seconds (EG 900), which can create ' +
+            'email in some cron setups. Set to 0 to disable.')
         parser.add_argument(
             '-R', '--critical-subprocess',
             action='store_true',
             dest='critical_subprocess',
             help='Generate an error if any rsync subprocess returns ' +
-                 'non-zero value, which can generate email in some ' +
-                 'cron setups')
+            'non-zero value, which can generate email in some ' +
+            'cron setups')
 
         agroup = parser.add_mutually_exclusive_group()
         agroup.add_argument(
@@ -238,16 +245,7 @@ class DSConfig:
             dest='quiet',
             help="No logging to STDOUT (EG for cron)")
 
-        args = parser.parse_args()
-
-        # Update self intially with args. Values set here may
-        # subsequently be overridden by YAML, however what is set
-        # here controls what YAML file we open.
-        for key, val in args.__dict__.items():
-            if key.endswith('file'):
-                setattr(self.paths, key, val)
-            else:
-                setattr(self, key, val)
+        return parser.parse_args()
 
     def __open_yaml(self):
         '''Attempt to open our YAML file'''
@@ -273,7 +271,7 @@ class DSConfig:
         # YAML may override our default rsync options
         if 'options' in self.yaml['configuration']['rsync']:
             self.rsyncopts = self.parse_rsyncopts(
-                    self.yaml['configuration']['rsync']['options'])
+                self.yaml['configuration']['rsync']['options'])
 
         # Convert YAML to SimpleNamespaces. Process required keys
         for i in ['configuration', 'items']:

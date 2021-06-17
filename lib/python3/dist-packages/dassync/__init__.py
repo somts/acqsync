@@ -130,7 +130,7 @@ class DASSync:
                 successcount = len(self.success_jobs)
                 logstr = \
                     '%d syncs ran in %0.3f seconds (%d fail, %d success)' % (
-                         len(self.conf.jobs), timelen, failcount, successcount)
+                        len(self.conf.jobs), timelen, failcount, successcount)
 
                 self.conf.logger.debug('Success jobs:\n\t%s',
                                        '\n\t'.join(self.success_jobs))
@@ -140,18 +140,19 @@ class DASSync:
                 # mode (EG cron) which can often generate email. So, we
                 # conditionally raise an exception when we want this
                 # (per CLI args). Otherwise, we just log to INFO.
-                if not 0 == self.conf.critical_time and \
+                if failcount > 0:
+                    logstr += ' Failed jobs:\n\t%s' % \
+                            '\n\t'.join(self.failed_jobs)
+                    if self.conf.critical_subprocess:
+                        raise FatalError(logstr)
+
+                if self.conf.critical_time != 0 and \
                         self.conf.critical_time < timelen:
                     logstr += ' This is over %d seconds of time.' % \
                         self.conf.critical_time
                     logstr += ' There may be syncronization delays if'
                     logstr += ' your crontab is set to run more frequently.'
                     raise FatalError(logstr)
-                elif failcount > 0:
-                    logstr += ' Failed jobs:\n\t%s' % \
-                            '\n\t'.join(self.failed_jobs)
-                    if self.conf.critical_subprocess:
-                        raise FatalError(logstr)
 
                 if failcount > 0:
                     self.conf.logger.warning(logstr)
@@ -192,7 +193,7 @@ class DASSync:
             self.conf.logger.debug('rsync STDOUT: %s', stdout.decode())
 
             if retcode == 0:
-                self.conf.logger.info('SUCCESS %s' % cmdstr)
+                self.conf.logger.info('SUCCESS %s', cmdstr)
                 self.success_jobs.append(cmdstr)
             else:
                 # Maybe raise an exception later; just warn for now.
