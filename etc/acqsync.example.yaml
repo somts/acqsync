@@ -1,7 +1,11 @@
 # This file serves as an example file that can be copied to
 # acqsync.yaml as the basis for getting started.  It can also
 # be handed as an argument to bin/acsqync to test function.
-# The outcome will be copying /dev/null to /tmp a few times.
+# The outcome will be copying /dev/null to /tmp a few times as
+# well as generating several errors.
+# NOTE: quoted strings can be expanded using Jinja2 syntax. This
+#       allows for minor editing of the cruise module to affect
+#       where data is copied from/to.
 ---
 configuration:
   cruise:
@@ -10,8 +14,8 @@ configuration:
     end: 2021-01-31    # ISO format date
     sync_run: true     # false to disable sync of all items
   paths:
-    pid: /var/tmp/acqsync.pid
-    log: /var/tmp/acqsync.log
+    pid: /tmp/acqsync.pid
+    log: '/var/tmp/acqsync.{{ cruise.id }}.log'
   rsync:
     path: /usr/bin/rsync
     # Options will expand to rsync command-line options.
@@ -27,12 +31,7 @@ configuration:
       times: true
       specials: true
       chmod: 'Dg+st,ugo+rx,Fo-w,+X'
-      exclude:
-        - '.Trash*/'
-        - '._*'
-        - .DS_Store
-        - .TemporaryItems/
-        - Thumbs.db
+      exclude-from: '{{ paths.etc }}/exclude-from.example.txt'
       human-readable: true
       one-file-system: true
       timeout: 60
@@ -59,4 +58,7 @@ items:  # items that python will create rsync-in-a-shell threads for.
     dst: /tmp/DASSync.yaml
   /var/run/intentional_failure:
     dst: /tmp/i-should-fail
+  /var/foo/:
+    date_format: 'myfilename_%Y-%m-%d.txt'
+    dst: /tmp/
 ...

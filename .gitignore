@@ -3,4 +3,5 @@ __pycache__/
 etc/acqsync.yaml
 etc/rsync_excludes
 var/log/*.log
+var/log/*.log.?
 var/run/*.pid

@@ -6,6 +6,7 @@ Parse args and conf file and set up logging.
 #                 It was getting unweildy to manage to add features.
 
 import argparse
+import copy
 import datetime
 import logging
 import logging.handlers
@@ -13,7 +14,7 @@ import re
 import sys
 from itertools import chain
 from multiprocessing import cpu_count
-from pathlib import Path
+from pathlib import Path, PosixPath, WindowsPath
 from types import SimpleNamespace
 
 from jinja2 import Template
@@ -94,6 +95,9 @@ class DSConfig:
                             'timeout': '60'}):
         # setup/defaults
         self.paths = SimpleNamespace()
+
+        self.paths.etc = Path.joinpath(
+            Path(__file__).parents[4].absolute(), 'etc')
 
         # Continue setup, potentially based on user input
         # Update self intially with user args. Values set here may
@@ -264,15 +268,6 @@ class DSConfig:
     def check_yaml_conf(self):
         '''Validate configuration root key from YAML'''
 
-        # YAML may override our default rsync path
-        if 'path' in self.yaml['configuration']['rsync']:
-            self.cmdpath = self.yaml['configuration']['rsync']['path']
-
-        # YAML may override our default rsync options
-        if 'options' in self.yaml['configuration']['rsync']:
-            self.rsyncopts = self.parse_rsyncopts(
-                self.yaml['configuration']['rsync']['options'])
-
         # Convert YAML to SimpleNamespaces. Process required keys
         for i in ['configuration', 'items']:
             try:
@@ -295,75 +290,130 @@ class DSConfig:
                     'root key "%s" is not defined in %s! Exit.' %
                     (i, self.paths.yamlfile), err)
 
+        # Normalize/validate rsync path
+        try:
+            if not isinstance(self.rsync.path, PosixPath) and \
+                    not isinstance(self.rsync.path, WindowsPath):
+                self.rsync.path = Path(self.rsync.path)
+        except AttributeError:
+            self.rsync.path = Path(self.cmdpath)  # use class default
+        finally:
+            # Convert to string
+            self.rsync.path = str(self.rsync.path)
+
+        # Normalize rsync options
+        try:
+            if not isinstance(self.rsync.options, dict):
+                raise(ConfigFileSyntaxError,
+                      'self.rsync.options not a dict()!')
+        except AttributeError:
+            self.rsync.options = self.rsyncopts
+
+        # Expand Jinja2 syntax for rsync options when practicable
+        for key, val in self.rsync.options.items():
+            if isinstance(val, str):
+                self.rsync.options[key] = self.templatize(
+                        val, {'paths': self.paths, 'cruise': self.cruise})
+
     def check_yaml_items(self):
         '''Confirm all YAML items received are valid and append fully
            rendered CLI command to list of jobs.'''
 
-        for key, val in self.yaml['items'].items():
-            value = SimpleNamespace(**val)
+        for key, value in self.yaml['items'].items():
+            item = self._item_validate(key, value)
 
             try:
-                if value.enabled is False:  # ignore disabled
-                    continue
-            except AttributeError:  # implicit enabled
+                if isinstance(item.date_format, str):
+                    pass
+            except AttributeError:
+                self._item_build_job(key, item)  # Build singleton job
+            else:
+                # Build a series of date-based sub-jobs
+                days = (self.cruise.end - self.cruise.begin).days
+                for date in [self.cruise.begin + datetime.timedelta(days=x)
+                             for x in range(0, days)]:
+                    ditem = copy.deepcopy(item)  # copy to sub-item
+                    del ditem.date_format        # sanitize sub-item
+
+                    # build sub-item src/name
+                    ditem.src = '%s%s' % \
+                        (item.src, date.strftime(item.date_format))
+
+                    self._item_build_job(ditem.src, ditem)
+
+    def templatize(self, mystr, namespaces={}):
+        '''Apply Jinja2 expansion to a string and return.'''
+        template = Template(mystr)
+        return template.render(**namespaces)
+
+    def _item_build_job(self, name, item, template=True):
+        '''Build an rsync job from a SimpleNamespace object and a name.
+           Append to self.jobs when done.'''
+
+        # Conditionally run item through Jinja2 templating engine
+        if template:
+            ns = {'cruise': self.cruise,
+                  'paths': self.paths,
+                  'rsync': self.rsync}
+            item.src = self.templatize(item.src, ns)
+            item.dst = self.templatize(item.dst, ns)
+
+        # TODO: move me?
+        # Attempt to make parent dir if it does not exist
+        # if not os.path.isdir(os.path.dirname(item.dst)):
+        #    self.logger.debug('Creating "%s"', item.dst)
+        #    os.makedirs(item.dst)
+
+        # Job is tuple(cmd, shell) to pass to Pool.starmap()
+        # Build cmd using list() + chain() in order to create a flattened list.
+        # Merge global and item-specific dicts()
+        self.jobs.append(
+            (list(chain([self.rsync.path],
+                        self.parse_rsyncopts({**self.rsync.options,
+                                              **item.rsync_options}),
+                        [item.src, item.dst])),
+             item.shell))
+
+    def _item_validate(self, key, value):
+        '''Take a YAML hash and convert to SimpleNamespace, validating
+           the values received and setting defaults when missing'''
+        item = SimpleNamespace(**value)
+
+        # Determine if we need to execute in a subshell. This is
+        # less efficient, but required for globbing, which is
+        # often used. As such, it is true by default, for now
+        try:
+            if isinstance(item.shell, bool):
                 pass
+        except AttributeError:
+            item.shell = False
 
-            # set module-specific rsync options
-            try:
-                if not isinstance(value.rsync_options, dict):
-                    raise ConfigFileSyntaxError(
-                        'rsync_options in module "%s" (%s) ' %
-                        (key, self.paths.yamlfile) +
-                        'must be type dict, got %s' %
-                        type(value.rsync_options))
-            except AttributeError:
-                value.rsync_options = {}
+        # Set enabled bool if absent
+        try:
+            if isinstance(item.enabled, bool):
+                pass
+        except AttributeError:
+            item.enabled = True
 
-            # Run each module through Jinja2 templating engine
-            try:
-                srctemplate = Template(value.src)
-            except AttributeError:  # key when value.src is not present
-                srctemplate = Template(key)
-            finally:
-                dsttemplate = Template(value.dst)
-                value.src = srctemplate.render(
-                    cruise=self.cruise,
-                    paths=self.paths,
-                    rsync=self.rsync)
-                value.dst = dsttemplate.render(
-                    cruise=self.cruise,
-                    paths=self.paths,
-                    rsync=self.rsync)
+        # Set src from key (name) if absent
+        try:
+            if isinstance(item.src, str):
+                pass
+        except AttributeError:
+            item.src = key
 
-            # Determine if we need to execute in a subshell. This is
-            # less efficient, but required for globbing, which is
-            # often used. As such, it is true by default, for now
-            try:
-                shellbool = value.shell
-            except AttributeError:
-                shellbool = True
+        # set module-specific rsync options
+        try:
+            if not isinstance(item.rsync_options, dict):
+                raise ConfigFileSyntaxError(
+                    'rsync_options in module "%s" (%s) ' %
+                    (key, self.paths.yamlfile) +
+                    'must be type dict, got %s' %
+                    type(item.rsync_options))
+        except AttributeError:
+            item.rsync_options = {}
 
-            # TODO: move me?
-            # Attempt to make parent dir if it does not exist
-            # if not os.path.isdir(os.path.dirname(value.dst)):
-            #    self.logger.debug('Creating "%s"', value.dst)
-            #    os.makedirs(value.dst)
-
-            # Update self
-            setattr(self.items, key, value)
-
-            # build cmd using list() + chain() in order to
-            # create a flattened list. We then join on space specifically
-            # because shell=True in subprocess (which requires this).
-            # NOTE: we make our rsync options a set() in order to reduce
-            #       non-sensical double calls EG --verbose --verbose
-            self.jobs.append(
-                (list(chain([self.rsync.path],
-                            sorted(set(
-                                self.parse_rsyncopts(self.rsync.options) +
-                                self.parse_rsyncopts(value.rsync_options))),
-                            [value.src, value.dst])),
-                 shellbool))
+        return item
 
     @staticmethod
     def parse_cruise(cdict,
@@ -434,12 +484,18 @@ class DSConfig:
                     ', '.join(self.RSYNC_OPTIONS_VALID))
 
             if isinstance(val, bool):
-                if val is True:
-                    opts_list.append('--%s' % key)
+                # Ensure booleans are added or removed
+                arg = '--%s' % key
+                if val is True and arg not in opts_list:
+                    opts_list.append(arg)
+                elif val is False and arg in opts_list:
+                    opts_list.remove(arg)
             elif isinstance(val, list):
                 for i in val:
-                    opts_list.append('--%s="%s"' % (key, i))
+                    opts_list.append('--%s' % key)
+                    opts_list.append('%s' % i)
             else:
-                opts_list.append('--%s="%s"' % (key, val))
+                opts_list.append('--%s' % key)
+                opts_list.append('%s' % val)
 
         return opts_list
