@@ -6,7 +6,6 @@ Parse args and conf file and set up logging.
 #                 It was getting unweildy to manage to add features.
 
 import argparse
-import copy
 import datetime
 import logging
 import logging.handlers
@@ -15,11 +14,11 @@ import sys
 from itertools import chain
 from multiprocessing import cpu_count
 from pathlib import Path, PosixPath, WindowsPath
-from types import SimpleNamespace
 
 from jinja2 import Template
 import yaml
 from .error import ConfigFileSyntaxError, FatalError
+from .rsync import DSRsync
 
 
 class DSConfig:
@@ -28,73 +27,20 @@ class DSConfig:
         '2. Set self variables
          3. Create a list of jobs that will be used by DASSync'''
 
-    # We need to validate rsync options.  This list was taken
-    # from rsync version 3.1.3 protocol version 31. The CLI to get this
-    # into a Python list syntax from the rsync client was:
-    # rsync --help 2>&1 | \
-    #  awk '{ if ( $1 ~ "--" || $2 ~ "--") {
-    #           if ( $1 ~ /^--/ ) {print $1}
-    #           else {print $2}}}' | \
-    #  sed -e 's/^--//' -e 's/=.\+$//' -e "s/^/    '/" -e "s/$/',/" | \
-    #  sort
-    RSYNC_OPTIONS_VALID = [
-        '8-bit-output', 'acls', 'address', 'append', 'append-verify',
-        'archive', 'backup', 'backup-dir', 'block-size', 'blocking-io',
-        'bwlimit', 'checksum', 'checksum-choice', 'checksum-seed',
-        'chmod', 'chown', 'compare-dest', 'compress', 'compress-level',
-        'contimeout', 'copy-dest', 'copy-dirlinks', 'copy-links',
-        'copy-unsafe-links', 'cvs-exclude', 'debug', 'del',
-        'delay-updates', 'delete', 'delete-after', 'delete-before',
-        'delete-delay', 'delete-during', 'delete-excluded',
-        'delete-missing-args', 'devices', 'dirs', 'dry-run', 'exclude',
-        'exclude-from', 'executability', 'existing', 'fake-super',
-        'files-from', 'filter', 'force', 'from0', 'fuzzy', 'group',
-        'groupmap', 'hard-links', 'help', 'human-readable', 'iconv',
-        'ignore-errors', 'ignore-existing', 'ignore-missing-args',
-        'ignore-times', 'include', 'include-from', 'info', 'inplace',
-        'ipv4', 'ipv6', 'itemize-changes', 'keep-dirlinks', 'link-dest',
-        'links', 'list-only', 'log-file', 'log-file-format',
-        'max-delete', 'max-size', 'min-size', 'modify-window',
-        'msgs2stderr', 'munge-links', 'no-implied-dirs', 'no-motd',
-        'noatime', 'numeric-ids', 'omit-dir-times', 'omit-link-times',
-        'one-file-system', 'only-write-batch', 'out-format', 'outbuf',
-        'owner', 'partial', 'partial-dir', 'password-file', 'perms',
-        'port', 'preallocate', 'progress', 'protect-args', 'protocol',
-        'prune-empty-dirs', 'quiet', 'read-batch', 'recursive',
-        'relative', 'remote-option', 'remove-source-files', 'rsh',
-        'rsync-path', 'safe-links', 'size-only', 'skip-compress',
-        'sockopts', 'sparse', 'specials', 'stats', 'stop-at', 'suffix',
-        'super', 'temp-dir', 'time-limit', 'timeout', 'times', 'update',
-        'usermap', 'verbose', 'version', 'whole-file', 'write-batch',
-        'xattrs']
-
-    # Append 'no-' options to above and convert to a sorted tuple.
-    # Almost all long strings in rsync can be prepended with 'no-' to
-    # negate implicit commands. To account for this, we'll simply
-    # duplicate the above list, prepending 'no-' to each item. This
-    # causes a handful of non-sensical options like --no-version to be
-    # pass validation in Python.  However, since rsync will generate
-    # an error at runtime for those few not-really-valid "no-" options,
-    # we tolerate the cheap hack, here, as a list that has a few too
-    # many options is better than no validation in Python whatsoever.
-    # NOTE: our final product is a tuple as we no longer want to modify
-    # afterwards, plus this enables more efficient validity checking.
-    RSYNC_OPTIONS_VALID = tuple(sorted(
-        RSYNC_OPTIONS_VALID + ['no-{0}'.format(i) for i in
-                               RSYNC_OPTIONS_VALID]))
-
     def __init__(self,
                  cmdpath='/usr/bin/rsync',
                  rsyncopts={'archive': True,
                             'chmod': 'Dg+st,ugo+rx,Fo-w,+X',
-                            'exclude': ['Trash*/"', '_*"', 'DS_Store',
+                            'exclude': ['Trash*/', '_*', 'DS_Store',
                                         'TemporaryItems/', 'Thumbs.db'],
                             'no-g': True,
                             'no-p': True,
-                            'one-file-system': True,
-                            'timeout': '60'}):
+                            'timeout': 60,
+                            'contimeout': 10}):
         # setup/defaults
-        self.paths = SimpleNamespace()
+        self.dsrsync = DSRsync()  # instance to interact with rsync
+        self.paths = argparse.Namespace()
+        self.makedirs = set()
 
         self.paths.etc = Path.joinpath(
             Path(__file__).parents[4].absolute(), 'etc')
@@ -104,39 +50,65 @@ class DSConfig:
         # subsequently be overridden by YAML, however what is set
         # here controls what YAML file we open.
         for key, val in self.__conf_args().__dict__.items():
-            if key.endswith('file'):
-                setattr(self.paths, key, val)
+            if key.endswith('path'):
+                # Map anything that ends with 'path' to self.conf.paths
+                # removing the 'path' portion of the variable name.
+                # This allows us to keep the naming in YAML cleaner
+                # (EG paths.pid)
+                setattr(self.paths, key.replace('path', ''), val)
             else:
                 setattr(self, key, val)
 
         # Allow YAML to override/augment user options
         self.yaml = self.__open_yaml()
         self.check_yaml_conf()
-        self.jobs = []  # we need a blank list for YAML items
-
+        self.enabled_jobs = []  # we need a blank list for YAML items
+        self.disabled_jobs = []  # we need a blank list for YAML items
+        self.cruise.days = (self.cruise.end - self.cruise.begin).days
         self.check_yaml_items()
 
+        # Normalize self.paths variables to Path types after allowing
+        # our templating engine to expand cruise variables.
+        ns = {'cruise': self.cruise}
+        for key, val in self.paths.__dict__.items():
+            if isinstance(val, Path):
+                val = val.__str__()
+            setattr(self.paths, key, Path(self.templatize(val, ns)))
+
         # Set up logger, post CLI/YAML eval
-        self.logconf = SimpleNamespace(consolehandler=logging.StreamHandler())
+        self.logconf = argparse.Namespace(
+            consolehandler=logging.StreamHandler())
         self.logger = logging.getLogger('DASSync')
 
         # Set up rfhandler, based on derived logfile
-        setattr(
-            self.logconf,
-            'rfhandler',
-            logging.handlers.RotatingFileHandler(
-                self.paths.logfile,
-                maxBytes=1024*1024,
-                backupCount=4
-            )
-        )
+        # As this tool is for near real-time data transfer, there is
+        # not really a need to troubleshoot very far back in time, so,
+        # hard-code the log file size and backup count to values that
+        # will not overwhelm small filesystems. Python itself rotates
+        # the log(s) when needed, allowing us to store the log outside
+        # of a logrotate dependency.
+        try:
+            setattr(self.logconf, 'rfhandler',
+                    logging.handlers.RotatingFileHandler(
+                        self.paths.log.__str__(), maxBytes=26214400,
+                        backupCount=3))
+        except FileNotFoundError:
+            raise FatalError('Not able to open log file %s!' % self.paths.log)
 
         # With setup complete, configure our logger
         self.__conf_log()
 
-        # Sort rendered commands. In multithreading, they get executed
-        # in somewhat arbitrary order, but this makes debugging easier.
-        self.jobs.sort()
+        self.logger.info('Rsync version is %s', self.dsrsync.version)
+        self.logger.info('Rsync protocol version is %d', self.dsrsync.protocol)
+        self.logger.info('Configured cruise, %s, is %d days long (%s to %s)',
+                         self.cruise.id, self.cruise.days,
+                         self.cruise.begin, self.cruise.end)
+
+        # Sort rendered commands. Multithreading may execute in
+        # arbitrary order, so this is really just to make testing with
+        # the -b option more readable.
+        self.enabled_jobs.sort()
+        self.disabled_jobs.sort()
 
     def __conf_log(self):
         '''Configure logging object for use from acqsync'''
@@ -190,22 +162,22 @@ class DSConfig:
         )
 
         parser.add_argument(
-            '-L', '--logfile',
-            dest='logfile',
+            '-L', '--logpath',
+            dest='logpath',
             default=Path.joinpath(Path(__file__).parents[4].absolute(),
                                   'var', 'log', 'acqsync.log'),
             type=lambda p: Path(p).absolute(),
             help='log file to write to')
         parser.add_argument(
-            '-P', '--pidfile',
-            dest='pidfile',
+            '-P', '--pidpath',
+            dest='pidpath',
             default=Path.joinpath(Path(__file__).parents[4].absolute(),
                                   'var', 'run', 'acqsync.pid'),
             type=lambda p: Path(p).absolute(),
             help='PID file to track')
         parser.add_argument(
-            '-Y', '--yamlfile',
-            dest='yamlfile',
+            '-Y', '--yamlpath',
+            dest='yamlpath',
             default=Path.joinpath(Path(__file__).parents[4].absolute(),
                                   'etc', 'acqsync.yaml'),
             type=lambda p: Path(p).absolute(),
@@ -231,6 +203,14 @@ class DSConfig:
             help='Generate an error if any rsync subprocess returns ' +
             'non-zero value, which can generate email in some ' +
             'cron setups')
+        parser.add_argument(
+            '-S', '--shell',
+            action='store_true',
+            dest='shell',
+            help='Set default subprocess shell value. Disabling ' +
+            'shells can be more efficient and allow better ' +
+            'cross-platform support, but globbing is not possible. ' +
+            'Note that some strings will automatically enable shell')
 
         agroup = parser.add_mutually_exclusive_group()
         agroup.add_argument(
@@ -247,28 +227,33 @@ class DSConfig:
             '-q', '--quiet',
             action='store_true',
             dest='quiet',
-            help="No logging to STDOUT (EG for cron)")
+            help='Minor(-W/-R) or no logging to STDOUT (EG for cron).')
+        agroup.add_argument(
+            '-b', '--build-only',
+            action='store_true',
+            dest='build_only',
+            help='Build rsync commands and log; do not `rsync --dry-run`')
 
         return parser.parse_args()
 
     def __open_yaml(self):
         '''Attempt to open our YAML file'''
         try:
-            with open(self.paths.yamlfile, 'rb') as cfg:
+            with open(self.paths.yaml, 'rb') as cfg:
                 myyaml = yaml.load(cfg, Loader=yaml.FullLoader)
         except IOError as err:
             raise FatalError(
-                'Cannot locate or open %s.' % self.paths.yamlfile, err)
+                'Cannot locate or open %s.' % self.paths.yaml, err)
         except ValueError as err:
             raise ConfigFileSyntaxError(
-                'Syntax error in targets file %s.' % self.paths.yamlfile,
+                'Syntax error in targets file %s.' % self.paths.yaml,
                 err)
         return myyaml
 
     def check_yaml_conf(self):
         '''Validate configuration root key from YAML'''
 
-        # Convert YAML to SimpleNamespaces. Process required keys
+        # Convert YAML to argparse.Namespace. Process required keys
         for i in ['configuration', 'items']:
             try:
                 if i == 'configuration':  # Process subkeys in config
@@ -278,17 +263,17 @@ class DSConfig:
                                     self.parse_cruise(self.yaml[i][j]))
                         elif j == 'paths':
                             for k, v in self.yaml[i][j].items():
-                                setattr(self, '%sfile' % k, v)
+                                setattr(self.paths, k, v)
                         else:
                             setattr(self, j,
-                                    SimpleNamespace(**self.yaml[i][j]))
+                                    argparse.Namespace(**self.yaml[i][j]))
                 else:
                     # root key "items" (and future)
-                    setattr(self, i, SimpleNamespace(**self.yaml[i]))
+                    setattr(self, i, argparse.Namespace(**self.yaml[i]))
             except AttributeError as err:
                 raise ConfigFileSyntaxError(
                     'root key "%s" is not defined in %s! Exit.' %
-                    (i, self.paths.yamlfile), err)
+                    (i, self.paths.yaml), err)
 
         # Normalize/validate rsync path
         try:
@@ -309,12 +294,6 @@ class DSConfig:
         except AttributeError:
             self.rsync.options = self.rsyncopts
 
-        # Expand Jinja2 syntax for rsync options when practicable
-        for key, val in self.rsync.options.items():
-            if isinstance(val, str):
-                self.rsync.options[key] = self.templatize(
-                        val, {'paths': self.paths, 'cruise': self.cruise})
-
     def check_yaml_items(self):
         '''Confirm all YAML items received are valid and append fully
            rendered CLI command to list of jobs.'''
@@ -323,96 +302,137 @@ class DSConfig:
             item = self._item_validate(key, value)
 
             try:
-                if isinstance(item.date_format, str):
-                    pass
+                # Special behavior needed when filter_date is set
+                # We expect a str and it should convert to a Path.
+                if isinstance(item.filter_date, str):
+                    item.filter_date = Path(item.filter_date)
+                else:
+                    raise ConfigFileSyntaxError(
+                        'filter_date must be a string')
             except AttributeError:
-                self._item_build_job(key, item)  # Build singleton job
+                pass
             else:
-                # Build a series of date-based sub-jobs
-                days = (self.cruise.end - self.cruise.begin).days
+                # Convert filter_date to a list of filter args
+
+                filters = set()  # STEP 1: prepare an empty set
+
                 for date in [self.cruise.begin + datetime.timedelta(days=x)
-                             for x in range(0, days)]:
-                    ditem = copy.deepcopy(item)  # copy to sub-item
-                    del ditem.date_format        # sanitize sub-item
+                             for x in range(0, self.cruise.days + 1)]:
+                    mypath = date.strftime(item.filter_date.__str__())
 
-                    # build sub-item src/name
-                    ditem.src = '%s%s' % \
-                        (item.src, date.strftime(item.date_format))
+                    # STEP 2: add parent paths to --filter
 
-                    self._item_build_job(ditem.src, ditem)
+                    # NOTE: Calculate parent path(s) for every rendered
+                    # path. This catchs year-based and month-based
+                    # parent directories. The Python set() type avoids
+                    # duplicating such parents, so we can afford to be
+                    # messy since cruises tend to be, at most 60 days,
+                    # and so (re)calculating is cheap enough...
+
+                    # The last parent is either '.' or '/'. Excise.
+                    parents = list(Path(mypath).parents)[:-1]
+                    parents.reverse()  # Lowest level dir first
+                    for i in parents:
+                        filters.add('+ %s/' % i)
+
+                    # STEP 3: add specific filenames based on date
+                    #         range. This all gets sorted().
+                    filters.add('+ %s' % mypath)
+
+                filters.add('- *')  # STEP 4: exclude anything else
+
+                # STEP 5: sort and convert to expected data type
+                filters = sorted(filters)
+
+                # STEP 6: append to or create --filter
+                try:
+                    item.options['filter'] += filters
+                except KeyError:
+                    item.options['filter'] = filters
+
+                # STEP 7: sanitize item before build
+                del item.filter_date
+            finally:
+                self._item_build_job(key, item)  # Build singleton job
 
     def templatize(self, mystr, namespaces={}):
         '''Apply Jinja2 expansion to a string and return.'''
         template = Template(mystr)
         return template.render(**namespaces)
 
-    def _item_build_job(self, name, item, template=True):
-        '''Build an rsync job from a SimpleNamespace object and a name.
-           Append to self.jobs when done.'''
+    def _item_build_job(self, name, item):
+        '''Build an rsync job from a argparse.Namespace object and a name.
+           Append to self.*jobs when done.'''
 
-        # Conditionally run item through Jinja2 templating engine
-        if template:
-            ns = {'cruise': self.cruise,
-                  'paths': self.paths,
-                  'rsync': self.rsync}
-            item.src = self.templatize(item.src, ns)
-            item.dst = self.templatize(item.dst, ns)
+        ns = {'cruise': self.cruise, 'paths': self.paths, 'rsync': self.rsync}
 
-        # TODO: move me?
-        # Attempt to make parent dir if it does not exist
-        # if not os.path.isdir(os.path.dirname(item.dst)):
-        #    self.logger.debug('Creating "%s"', item.dst)
-        #    os.makedirs(item.dst)
+        # Register a need to make parent dir(s) when they do not exist
+        # after running rname through Jinja2 templating engine
+        pdir = Path(self.templatize(item.dst, ns)).parent
+        if not pdir.is_dir():
+            self.makedirs.add(pdir)
+
+        # Merge main and specific dicts(); override shell as needed
+        opts, item.shell = self.dsrsync.parse_rsyncopts(
+            {**self.rsync.options, **item.options},
+            self.dry_run, self.debug, item.shell)
+
+        # Build job using list() + chain() to create a flattened list.
+        job = list(chain([self.rsync.path], opts, [item.src, item.dst]))
+
+        # Run job list through Jinja2 templating engine
+        job = [self.templatize(x, ns) for x in job]
 
         # Job is tuple(cmd, shell) to pass to Pool.starmap()
-        # Build cmd using list() + chain() in order to create a flattened list.
-        # Merge global and item-specific dicts()
-        self.jobs.append(
-            (list(chain([self.rsync.path],
-                        self.parse_rsyncopts({**self.rsync.options,
-                                              **item.rsync_options}),
-                        [item.src, item.dst])),
-             item.shell))
+        # Whether enabled or not, we want to render/test/log
+        # all items in our configuration
+        if item.enable is True:
+            self.enabled_jobs.append((job, item.shell))
+        else:
+            self.disabled_jobs.append((job, item.shell))
 
     def _item_validate(self, key, value):
-        '''Take a YAML hash and convert to SimpleNamespace, validating
-           the values received and setting defaults when missing'''
-        item = SimpleNamespace(**value)
+        '''Take a YAML hash and convert to argparse.Namespace,
+           validating the values received and setting defaults for
+           required paramters.'''
+        # Define supported values and default values (not None) when
+        # defaults are desired
+        supported_types = {'dst': str, 'enable': bool,
+                           'filter_date': str, 'options': dict,
+                           'shell': bool, 'src': str}
+        supported_keys = supported_types.keys()
+        supported_defaults = {'enable': True, 'options': {},
+                              'shell': self.shell, 'src': key}
 
-        # Determine if we need to execute in a subshell. This is
-        # less efficient, but required for globbing, which is
-        # often used. As such, it is true by default, for now
-        try:
-            if isinstance(item.shell, bool):
-                pass
-        except AttributeError:
-            item.shell = False
+        item = argparse.Namespace(**value)
 
-        # Set enabled bool if absent
-        try:
-            if isinstance(item.enabled, bool):
-                pass
-        except AttributeError:
-            item.enabled = True
+        # Set defaults when values are absent.
+        for reqkey, defval in supported_defaults.items():
+            if not item.__contains__(reqkey):
+                setattr(item, reqkey, defval)
 
-        # Set src from key (name) if absent
-        try:
-            if isinstance(item.src, str):
-                pass
-        except AttributeError:
-            item.src = key
-
-        # set module-specific rsync options
-        try:
-            if not isinstance(item.rsync_options, dict):
+        # Confirm valid data types
+        for i in item.__dict__.keys():
+            if i not in supported_keys:
                 raise ConfigFileSyntaxError(
-                    'rsync_options in module "%s" (%s) ' %
-                    (key, self.paths.yamlfile) +
-                    'must be type dict, got %s' %
-                    type(item.rsync_options))
-        except AttributeError:
-            item.rsync_options = {}
+                    '"%s" is not a supported item parameter.' % i)
 
+            if not isinstance(getattr(item, i), supported_types[i]):
+                raise ConfigFileSyntaxError(
+                    'Expected %s data type for items.%s.%s.' % (
+                        supported_types[i], key, i))
+
+            # Special Case: convert src/dst str to Path
+            if i == 'src' or i == 'dst':
+                setattr(item, i, str(getattr(item, i)))
+
+        # Special Case: prepend relative item
+        try:
+            if self.paths.dstbase and not Path(item.dst).is_absolute():
+                item.dst = Path(self.paths.dstbase).joinpath(item.dst).__str__()
+        except AttributeError as err:
+            print(err)
+            pass
         return item
 
     @staticmethod
@@ -455,47 +475,4 @@ class DSConfig:
                 raise ConfigFileSyntaxError(
                     'Required cruise parameter "%s" is not defined. Exit.' % i)
 
-        return SimpleNamespace(**cdict)
-
-    def parse_rsyncopts(self, opts_dict):
-        '''Convert a dict of rsync options to an array of rsync CLI
-           options, verifying them against cached valid options from
-           `man rsync`.'''
-        opts_list = []
-
-        # Override rsync verbosity, based on CLI args
-        if self.dry_run or self.debug:
-            opts_dict['quiet'] = False
-            opts_dict['verbose'] = True
-
-            if self.dry_run:
-                # Override rsync copying behavior
-                opts_dict['dry-run'] = True
-        else:
-            # Override rsync verbosity: only print errors to console
-            opts_dict['quiet'] = True
-            opts_dict['verbose'] = False
-
-        for key, val in opts_dict.items():
-            if key not in self.RSYNC_OPTIONS_VALID:
-                raise ConfigFileSyntaxError(
-                    'Unsupported rsync option "%s".\n' % key +
-                    'Valid options are %s' %
-                    ', '.join(self.RSYNC_OPTIONS_VALID))
-
-            if isinstance(val, bool):
-                # Ensure booleans are added or removed
-                arg = '--%s' % key
-                if val is True and arg not in opts_list:
-                    opts_list.append(arg)
-                elif val is False and arg in opts_list:
-                    opts_list.remove(arg)
-            elif isinstance(val, list):
-                for i in val:
-                    opts_list.append('--%s' % key)
-                    opts_list.append('%s' % i)
-            else:
-                opts_list.append('--%s' % key)
-                opts_list.append('%s' % val)
-
-        return opts_list
+        return argparse.Namespace(**cdict)

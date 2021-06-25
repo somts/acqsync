@@ -14,6 +14,7 @@ configuration:
     end: 2021-01-31    # ISO format date
     sync_run: true     # false to disable sync of all items
   paths:
+    dstbase: '/tmp/{{ cruise.id }}'
     pid: /tmp/acqsync.pid
     log: '/var/tmp/acqsync.{{ cruise.id }}.log'
   rsync:
@@ -34,31 +35,33 @@ configuration:
       exclude-from: '{{ paths.etc }}/exclude-from.example.txt'
       human-readable: true
       one-file-system: true
+      stats: true
       timeout: 60
 items:  # items that python will create rsync-in-a-shell threads for.
   '/dev/null':  # src inherited from module name; must be unique
-    enabled: true
-    dst: '/tmp/{{ cruise.id }}'
+    enable: true
+    dst: '{{ cruise.id }}_{{cruise.begin }}-{{ cruise.end }}'
+    options: {fake-super: true}
   foo:
-    enabled: true
+    enable: true
     src: '/dev/null'
-    dst: '/tmp/'
+    dst: '.'
+    options: {fake-super: true}
   bar:
-    enabled: false
+    enable: false
     src: '/dev/null'
-    dst: '/tmp/{{ cruise.id }}_bar'
+    dst: '{{ cruise.id }}_bar'
+    options: {fake-super: true}
   baz:
-    # implicit enabled
+    # implicit enable
     src: '/dev/null'
     dst: /tmp/baz
-    rsync_options: {exclude: baz/}
+    options: {exclude: baz/, fake-super: true}
   '{{ paths.logfile }}':
-    dst: /tmp/DASSync.log.txt
-  '{{ paths.conffile }}':
-    dst: /tmp/DASSync.yaml
-  /var/run/intentional_failure:
-    dst: /tmp/i-should-fail
-  /var/foo/:
-    date_format: 'myfilename_%Y-%m-%d.txt'
-    dst: /tmp/
+    dst: 'meta/DASSync.log.txt'
+  '{{ paths.yamlfile }}':
+    dst: '/tmp/{{ cruise.id }}/meta/DASSync.yaml'
+  /var/tmp/:
+    filter_date: 'filetest_%Y-%m-%d.txt'
+    dst: 'myinstrument/data/'
 ...

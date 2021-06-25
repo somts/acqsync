@@ -26,9 +26,7 @@ formatted per .yaml files in EXAMPLES dir.
 #                 codes and valid arguments.
 
 import os
-import subprocess
 import sys
-import threading
 import time
 from multiprocessing.dummy import Pool
 from .config import DSConfig
@@ -38,102 +36,121 @@ from .error import FatalError
 class DASSync:
     '''Execute N rsync jobs and report on what happened'''
 
-    RSYNC_RETURN_CODES = {
-      0: 'Success',
-      1: 'Syntax or usage error',
-      2: 'Protocol incompatibility',
-      3: 'Errors selecting input/output files, dirs',
-      4: '''Requested action not supported: an attempt was made to
-            manipulate 64-bit files on a platform that cannot support
-            them; or an option was specified that is supported
-            by the client and not by the server.''',
-      5: 'Error starting client-server protocol',
-      6: 'Daemon unable to append to log-file',
-      10: 'Error in socket I/O',
-      11: 'Error in file I/O',
-      12: 'Error in rsync protocol data stream',
-      13: 'Errors with program diagnostics',
-      14: 'Error in IPC code',
-      20: 'Received SIGUSR1 or SIGINT',
-      21: 'Some error returned by waitpid()',
-      22: 'Error allocating core memory buffers',
-      23: 'Partial transfer due to error',
-      24: 'Partial transfer due to vanished source files',
-      25: 'The --max-delete limit stopped deletions',
-      30: 'Timeout in data send/receive',
-      35: 'Timeout waiting for daemon connection'
-    }
-
     def __init__(self):
         '''Configuration can be complex so we do our setup in a
            dedicated class.'''
         self.conf = DSConfig()
-
-        # Set up an empty lists to track what subprocesses fail/succeed
-        self.failed_codes = set()
-        self.failed_jobs = []
-        self.success_jobs = []
+        self.rsync = self.conf.dsrsync
+        self.pid = os.getpid()
 
     def check_pid(self):
         '''check to see if we're already running. Quit if we are,
            'lock' if we aren't.'''
-        pid = os.getpid()
 
         self.conf.logger.debug('Checking for PID file %s against PID %d',
-                               self.conf.paths.pidfile, pid)
-        if os.path.exists(self.conf.paths.pidfile):
+                               self.conf.paths.pid, self.pid)
+        if os.path.exists(self.conf.paths.pid):
             self.conf.logger.debug(
-                'Found pidfile, checking for running process...')
-            with open(self.conf.paths.pidfile, 'r') as pidfile:
+                'Found PID file (%s); checking for running process...',
+                self.conf.paths.pid)
+            with open(self.conf.paths.pid, 'r') as pidfile:
                 try:
                     # read file and check to see if PID exists
                     oldpid = int(pidfile.read())
                     # kill -0 the pid to see if the PID exists
                     os.kill(oldpid, 0)
                     self.conf.logger.exception(
-                        'acqsync is already running, PID %d!', oldpid)
+                        'PID %d is already running and has acqsync "locked"!',
+                        oldpid)
                     sys.exit(1)
                 except (OSError, ValueError) as err:
                     self.conf.logger.warning(
-                        '%s existed, but no running PID. %s',
-                        self.conf.paths.pidfile,
-                        'Attempt cleanup of expired PID file, and proceed...'
+                        '%s exists, but no running PID. %s',
+                        self.conf.paths.pid,
+                        'Attempt cleanup of expired PID file...'
                     )
                     self.conf.logger.debug(err)
 
-                    # cleanup self.conf.paths.pidfile and move on
-                    os.remove(self.conf.paths.pidfile)
-                    self.conf.logger.warning('Cleanup successful')
+                    # cleanup self.conf.paths.pid and move on
+                    try:
+                        os.remove(self.conf.paths.pid)
+                    except (IOError, PermissionError) as err:
+                        self.conf.logger.fatal(
+                            'Could not remove PID file: %s. %s',
+                            self.conf.paths.pid, err)
+                        sys.exit(2)
+                    else:
+                        self.conf.logger.warning('Cleanup successful')
 
         try:  # create pid file
-            with open(self.conf.paths.pidfile, 'w') as pidfile:
-                self.conf.logger.debug('Creating PID file: %s (PID %d)',
-                                       self.conf.paths.pidfile, pid)
-                pidfile.write('%d' % pid)
-                self.conf.logger.info('PID file %s "locked" by PID %d',
-                                      self.conf.paths.pidfile, pid)
+            with open(self.conf.paths.pid, 'w') as pidfile:
+                self.conf.logger.debug('PID %d is creating PID file %s',
+                                       self.pid, self.conf.paths.pid)
+                pidfile.write('%d' % self.pid)
+                self.conf.logger.info('PID %d has "locked" acqsync (%s)',
+                                      self.pid, self.conf.paths.pid)
         except (IOError, PermissionError) as err:
-            self.conf.logger.exception('Could not create PID file: %s. %s',
-                                       self.conf.paths.pidfile, err)
-            sys.exit(2)
+            self.conf.logger.fatal('Could not create PID file: %s. %s',
+                                   self.conf.paths.pid, err)
+            sys.exit(3)
 
-    def cleanup_pid(self):
+    def prepare_dirs(self):
+        '''Create target directories as possible'''
+
+        # Sort our set so that we make parents before children
+        for i in sorted(self.conf.makedirs):
+            if not i.is_dir():
+                if self.conf.dry_run:
+                    logstr = 'Would have created %s'
+                else:
+                    try:
+                        i.mkdir(parents=True)
+                    except (IOError, PermissionError) as err:
+                        self.conf.logger.fatal(
+                            'Could not create %s! Quit.\n%s', i, err)
+                        sys.exit(3)
+                    else:
+                        logstr = 'Created %s'
+                self.conf.logger.info(logstr, i.__str__())
+
+    def clean_pid(self):
         '''Clean up PID file'''
         try:
-            self.conf.logger.debug('Process exiting.  Attempting to cleanup')
-            os.remove(self.conf.paths.pidfile)
-            self.conf.logger.debug('Cleanup successful')
+            self.conf.logger.info(
+                'PID %d is exiting. Attempting to cleanup %s',
+                self.pid, self.conf.paths.pid)
+            os.remove(self.conf.paths.pid)
+            self.conf.logger.info('PID %d cleanup successful. Exit', self.pid)
         except (IOError, PermissionError, OSError) as err:
             # cleanup failed, shouldn't get called
             self.conf.logger.debug(err)
             self.conf.logger.exception(
-                'Cleanup failed: Could not remove PID file at exit')
+                'Cleanup failed: Could not remove PID file %s at exit',
+                self.conf.paths.pid)
+
+    def log_disabled(self):
+        '''Output all rendered job info to our logger'''
+        self.conf.logger.info(
+            'Cruise sync_run is disabled in %s. Not an error. Exit.',
+            self.conf.targetsfilepath)
+
+    def log_built_jobs(self):
+        '''Output all rendered job info to our logger'''
+        ejobs = [' '.join(x[0]) for x in self.conf.enabled_jobs]
+        djobs = [' '.join(x[0]) for x in self.conf.disabled_jobs]
+        self.conf.logger.warning(
+            "\n\n".join(['Build-only mode. No rsync execution.',
+                         'Rendered %d total jobs, %d enabled, %d disabled',
+                         'ENABLED JOBS:\n\n%s', 'DISABLED JOBS:\n\n%s']),
+            len(ejobs+djobs), len(ejobs), len(djobs),
+            "\n\n".join(ejobs), "\n\n".join(djobs))
 
     def run_syncs(self):
         '''Determine if this is the only acqsync process running, then
            execute all configured syncs'''
 
-        self.check_pid()
+        self.check_pid()     # "lock" with PID file
+        self.prepare_dirs()  # prepare any missing directories we can
         self.conf.logger.info('DASSync started')
         try:
             try:
@@ -142,39 +159,57 @@ class DASSync:
                 # the logs but get datasets copied quicker.
                 btime = time.perf_counter()
                 with Pool(processes=self.conf.threadcount) as pool:
+                    jlen = len(self.conf.enabled_jobs)
                     self.conf.logger.info(
-                        'Starting up to %i parallel sync(s)...',
-                        self.conf.threadcount)
+                        '%d jobs enabled. Will run %d sync(s) at a time...',
+                        jlen, min(jlen, self.conf.threadcount))
                     try:
-                        pool.starmap(self.subsync, self.conf.jobs)
+                        pool.starmap(self.rsync.rsync_thread,
+                                     self.conf.enabled_jobs)
                     finally:
                         pool.close()  # no more jobs allowed
                         pool.join()   # wait for all jobs to complete
 
-                self.success_jobs.sort()
-                self.failed_jobs.sort()
+                self.rsync.success_jobs.sort()
+                self.rsync.failed_jobs.sort()
 
                 # Calculate how we did
                 timelen = time.perf_counter() - btime
-                failcount = len(self.failed_jobs)
-                successcount = len(self.success_jobs)
-                logstr = \
-                    '%d syncs ran in %0.3f seconds (%d fail, %d success)' % (
-                        len(self.conf.jobs), timelen, failcount, successcount)
-
-                self.conf.logger.debug('Success jobs:\n\t%s',
-                                       '\n\t'.join(self.success_jobs))
+                failcount = len(self.rsync.failed_jobs)
+                successcount = len(self.rsync.success_jobs)
 
                 # Log how we did. Some conditional logic bits, here.
                 # Logging to CRITICAL will generate output in quiet
                 # mode (EG cron) which can often generate email. So, we
                 # conditionally raise an exception when we want this
                 # (per CLI args). Otherwise, we just log to INFO.
+                if successcount > 0:
+                    sucstr = 'SUCCESS JOBS:\n'
+                    for i in self.rsync.success_jobs:
+                        sucstr += "\n".join([
+                            'COMMAND:\n%s' % i[0],
+                            'STDOUT:\n%s' % i[1].decode(),
+                            '', ''])
+                    self.conf.logger.debug(sucstr)
+                else:
+                    self.conf.logger.warning('SUCCESS JOBS count is zero!')
+
                 if failcount > 0:
-                    logstr += ' Failed jobs:\n\t%s' % \
-                            '\n\t'.join(self.failed_jobs)
+                    failstr = ' FAILED JOBS:\n'
+                    for i in self.rsync.failed_jobs:
+                        failstr += "\n".join([
+                            'COMMAND:\n%s' % i[0],
+                            'STDERR:\n%s' % i[2].decode(),
+                            '', ''])
+                    self.conf.logger.error(failstr)
+
                     if self.conf.critical_subprocess:
-                        raise FatalError(logstr)
+                        raise FatalError(failstr)
+
+                logstr = \
+                    '%d syncs ran in %0.3f seconds (%d fail, %d success)' % (
+                        len(self.conf.enabled_jobs), timelen, failcount,
+                        successcount)
 
                 if self.conf.critical_time != 0 and \
                         self.conf.critical_time < timelen:
@@ -190,49 +225,14 @@ class DASSync:
                     self.conf.logger.info(logstr)
 
                 # Lastly, note discrete failure codes received
-                if len(self.failed_codes) > 0:
+                if len(self.rsync.failed_codes) > 0:
                     self.conf.logger.error('Rsync failure codes:\n\t%s',
-                                           '\n\t'.join(self.failed_codes))
+                                           '\n\t'.join(
+                                               self.rsync.failed_codes))
 
+            except KeyboardInterrupt:
+                self.conf.logger.warn('Quitting upon keyboard interupt')
             except FatalError as err:
                 self.conf.logger.critical(err)
         finally:
-            self.cleanup_pid()
-
-    def subsync(self, command, shell=True):
-        '''Execute single command via subprocess and return results'''
-
-        # Update threadName from (EG) Thread-1 to rsync-1
-        mythread = threading.current_thread()
-
-        # Create string variant of command as needed
-        cmdstr = command
-        if isinstance(cmdstr, list):
-            cmdstr = ' '.join(command)
-
-        if shell is False:
-            cmd = command  # list not string, here
-            mythread.name = mythread.name.replace('Thread', 'NoShell')
-        else:
-            mythread.name = mythread.name.replace('Thread', 'Shell')
-            cmd = cmdstr   # string not list, here
-
-        self.conf.logger.debug('rsync COMMAND: %s...', cmdstr)
-        with subprocess.Popen(cmd,
-                              shell=shell,
-                              stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE) as proc:
-            stdout, stderr = proc.communicate()
-            retcode = proc.poll()
-
-            self.conf.logger.debug('rsync STDOUT: %s', stdout.decode())
-            self.conf.logger.debug('rsync return code %d: %s',
-                                   retcode, self.RSYNC_RETURN_CODES[retcode])
-            if retcode == 0:
-                self.success_jobs.append(cmdstr)
-            else:
-                # Raise an exception later; just warn for now.
-                self.failed_jobs.append(cmdstr)
-                self.failed_codes.add(self.RSYNC_RETURN_CODES[retcode])
-
-            return command, stdout, stderr, retcode
+            self.clean_pid()

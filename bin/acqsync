@@ -30,12 +30,14 @@ except (ModuleNotFoundError, NameError):
 def main():
     '''entry point when run from commandline'''
     sync = DASSync()
-    if sync.conf.cruise.sync_run is True:
+
+    # Execute different methods based on configured state
+    if sync.conf.build_only is True:
+        sync.log_built_jobs()
+    elif sync.conf.cruise.sync_run is False:
+        sync.log_disabled()
+    else:
         sync.run_syncs()
-    else:  # Do not run if disabled
-        sync.logger.info(
-            'Cruise sync_run is disabled in %s. Not an error. Exit.',
-            sync.conf.targetsfilepath)
 
 
 if __name__ == "__main__":
