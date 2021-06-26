@@ -108,22 +108,22 @@ items:
     enable: true
     dst: data/ctd/docs/Seabird/
   # Knudsen 3260 3.5/12kHz data.
-  'rsync://sr-echo.ucsd.edu/data/{{ cruise.id }}/':
+  'rsync://sr-echo.ucsd.edu/sgg_data/{{ cruise.id }}/':
     enable: true
-    dst: data/knudsen/3260/
-  'rsync://sr-echo.ucsd.edu/software/':
+    dst: data/echosounder-knudsen/3260/
+  'rsync://sr-echo.ucsd.edu/sgg_software/':
     enable: true
-    dst: software/knudsen/
+    dst: software/echosounder-knudsen/
     options:
       filter: ['+ ConversionUtility.exe', '+ PostSurvey.exe', '- *']
   # SBP-29
   'rsync://sr-echo-sbp.ucsd.edu/data/TOPAS_RAW':
     enable: true
-    dst: data/echo_sbp29/data/
+    dst: data/echosounder-sbp29/data/
     filter_date: '/%Y%m%d*'
   'rsync://sr-echo-sbp.ucsd.edu/data/SGY_Processed':
     enable: true
-    dst: data/echo_sbp29/data/
+    dst: data/echosounder-sbp29/data/
     filter_date: '/%Y%m%d*'
   # EK80
   # NOTE: host sr-ek80-bak could be used if primary system is down
@@ -131,7 +131,7 @@ items:
     enable: true
     dst: data/ek80/data/
   'rsync://sr-ek80.ucsd.edu/data/Calibration':
-    enable: true
+    enable: false
     dst: data/ek80/
   'rsync://sr-ek80.ucsd.edu/auto_screendumps':
     enable: false
@@ -156,7 +156,7 @@ items:
     enable: true
     dst: data/multibeam-em124/software/
   'rsync://sr-em124-sis.ucsd.edu/user_settings/':
-    enable: true
+    enable: false
     dst: data/multibeam-em124/user_settings/
   'rsync://sr-em124-sis.ucsd.edu/pictures/{{ cruise.id }}/':
     # Make {{ cruise.id }} dir in E:\sisdata\common\screendumps
@@ -181,7 +181,7 @@ items:
     enable: true
     dst: data/multibeam-em712/software/
   'rsync://sr-em712-sis.ucsd.edu/user_settings/':
-    enable: true
+    enable: false
     dst: data/multibeam-em712/user_settings/
   'rsync://sr-em712-sis.ucsd.edu/pictures/{{ cruise.id }}/':
     # Make {{ cruise.id }} dir in E:\sisdata\common\screendumps
