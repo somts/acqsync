@@ -30,7 +30,7 @@ import sys
 import time
 from multiprocessing.dummy import Pool
 from .config import DSConfig
-from .error import FatalError
+from .error import DSError, DSRsyncError
 
 
 class DASSync:
@@ -94,6 +94,80 @@ class DASSync:
                                    self.conf.paths.pid, err)
             sys.exit(3)
 
+    def clean_pid(self):
+        '''Clean up PID file'''
+        try:
+            self.conf.logger.info(
+                'PID %d is exiting. Attempting to cleanup %s',
+                self.pid, self.conf.paths.pid)
+            os.remove(self.conf.paths.pid)
+            self.conf.logger.info('PID %d cleanup successful. Exit', self.pid)
+        except (IOError, PermissionError, OSError) as err:
+            # cleanup failed, shouldn't get called
+            self.conf.logger.debug(err)
+            self.conf.logger.exception(
+                'Cleanup failed: Could not remove PID file %s at exit',
+                self.conf.paths.pid)
+
+    def log_built_jobs(self):
+        '''Output all rendered job info to our logger'''
+        ejobs = [' '.join(x[0]) for x in self.conf.enabled_jobs]
+        djobs = [' '.join(x[0]) for x in self.conf.disabled_jobs]
+        self.conf.logger.warning(
+            "\n\n".join(['Build-only mode. No rsync execution.',
+                         'Rendered %d total jobs, %d enabled, %d disabled',
+                         'ENABLED JOBS:\n\n%s', 'DISABLED JOBS:\n\n%s']),
+            len(ejobs+djobs), len(ejobs), len(djobs),
+            "\n\n".join(ejobs), "\n\n".join(djobs))
+
+    def log_disabled(self):
+        '''Output all rendered job info to our logger'''
+        self.conf.logger.warning(
+            'Cruise sync_run is disabled in %s. Not an error. Exit.',
+            self.conf.yamlpath)
+
+    def log_syncs(self, timelen):
+        '''Calculate/log the results of run_syncs()'''
+        failcount = len(self.rsync.failed_jobs)
+        successcount = len(self.rsync.success_jobs)
+
+        # Log how we did. Some conditional logic bits, here.
+        # Logging to CRITICAL will generate output in quiet
+        # mode (EG cron) which can often generate email. So, we
+        # conditionally raise an exception when we want this
+        # (per CLI args). Otherwise, we just log to INFO.
+        if successcount == 0:
+            self.conf.logger.warning('SUCCESS JOBS count is zero!')
+
+        if failcount > 0:
+            self.conf.logger.warning('FAILED JOBS count is greater than zero!')
+            if self.conf.critical_subprocess:
+                raise DSRsyncError('FAILED JOB COUNT: %d' % failcount)
+
+        logstr = \
+            '%d syncs ran in %0.3f seconds (%d fail, %d success)' % (
+                len(self.conf.enabled_jobs), timelen, failcount,
+                successcount)
+
+        if self.conf.critical_time != 0 and \
+                self.conf.critical_time < timelen:
+            logstr += ' This is over %d seconds of time.' % \
+                self.conf.critical_time
+            logstr += ' There may be syncronization delays if'
+            logstr += ' your crontab is set to run more frequently.'
+            raise DSError(logstr)
+
+        if failcount > 0:
+            self.conf.logger.warning(logstr)
+        else:
+            self.conf.logger.info(logstr)
+
+        # Lastly, note discrete failure codes received
+        if len(self.rsync.failed_codes) > 0:
+            self.conf.logger.error('Rsync failure codes:\n\t%s',
+                                   '\n\t'.join(
+                                       self.rsync.failed_codes))
+
     def prepare_dirs(self):
         '''Create target directories as possible'''
 
@@ -113,126 +187,38 @@ class DASSync:
                         logstr = 'Created %s'
                 self.conf.logger.info(logstr, i.__str__())
 
-    def clean_pid(self):
-        '''Clean up PID file'''
-        try:
-            self.conf.logger.info(
-                'PID %d is exiting. Attempting to cleanup %s',
-                self.pid, self.conf.paths.pid)
-            os.remove(self.conf.paths.pid)
-            self.conf.logger.info('PID %d cleanup successful. Exit', self.pid)
-        except (IOError, PermissionError, OSError) as err:
-            # cleanup failed, shouldn't get called
-            self.conf.logger.debug(err)
-            self.conf.logger.exception(
-                'Cleanup failed: Could not remove PID file %s at exit',
-                self.conf.paths.pid)
-
-    def log_disabled(self):
-        '''Output all rendered job info to our logger'''
-        self.conf.logger.info(
-            'Cruise sync_run is disabled in %s. Not an error. Exit.',
-            self.conf.targetsfilepath)
-
-    def log_built_jobs(self):
-        '''Output all rendered job info to our logger'''
-        ejobs = [' '.join(x[0]) for x in self.conf.enabled_jobs]
-        djobs = [' '.join(x[0]) for x in self.conf.disabled_jobs]
-        self.conf.logger.warning(
-            "\n\n".join(['Build-only mode. No rsync execution.',
-                         'Rendered %d total jobs, %d enabled, %d disabled',
-                         'ENABLED JOBS:\n\n%s', 'DISABLED JOBS:\n\n%s']),
-            len(ejobs+djobs), len(ejobs), len(djobs),
-            "\n\n".join(ejobs), "\n\n".join(djobs))
-
     def run_syncs(self):
         '''Determine if this is the only acqsync process running, then
            execute all configured syncs'''
+        btime = time.perf_counter()
 
-        self.check_pid()     # "lock" with PID file
-        self.prepare_dirs()  # prepare any missing directories we can
-        self.conf.logger.info('DASSync started')
         try:
-            try:
-                # Execute subprocesses in parallel, but log the output
-                # and/or errors in series. This allows humans to read
-                # the logs but get datasets copied quicker.
-                btime = time.perf_counter()
-                with Pool(processes=self.conf.threadcount) as pool:
-                    jlen = len(self.conf.enabled_jobs)
-                    self.conf.logger.info(
-                        '%d jobs enabled. Will run %d sync(s) at a time...',
-                        jlen, min(jlen, self.conf.threadcount))
-                    try:
-                        pool.starmap(self.rsync.rsync_thread,
-                                     self.conf.enabled_jobs)
-                    finally:
-                        pool.close()  # no more jobs allowed
-                        pool.join()   # wait for all jobs to complete
+            self.check_pid()     # "lock" with PID file
+            self.prepare_dirs()  # prepare any missing directories we can
+            self.conf.logger.info('DASSync started')
 
-                self.rsync.success_jobs.sort()
-                self.rsync.failed_jobs.sort()
+            # Execute subprocesses in parallel, but log the output
+            # and/or errors in series. This allows humans to read
+            # the logs but get datasets copied quicker.
+            with Pool(processes=self.conf.threadcount) as pool:
+                jlen = len(self.conf.enabled_jobs)
+                self.conf.logger.info(
+                    '%d jobs enabled. Will run %d sync(s) at a time...',
+                    jlen, min(jlen, self.conf.threadcount))
+                try:
+                    # Copy our logger instances to every job
+                    pool.starmap(
+                        self.rsync.rsync_thread,
+                        [list(x) + [self.conf.logger] for x in
+                            self.conf.enabled_jobs])
+                finally:
+                    pool.close()  # no more jobs allowed
+                    pool.join()   # wait for all jobs to complete
 
-                # Calculate how we did
-                timelen = time.perf_counter() - btime
-                failcount = len(self.rsync.failed_jobs)
-                successcount = len(self.rsync.success_jobs)
-
-                # Log how we did. Some conditional logic bits, here.
-                # Logging to CRITICAL will generate output in quiet
-                # mode (EG cron) which can often generate email. So, we
-                # conditionally raise an exception when we want this
-                # (per CLI args). Otherwise, we just log to INFO.
-                if successcount > 0:
-                    sucstr = 'SUCCESS JOBS:\n'
-                    for i in self.rsync.success_jobs:
-                        sucstr += "\n".join([
-                            'COMMAND:\n%s' % i[0],
-                            'STDOUT:\n%s' % i[1].decode(),
-                            '', ''])
-                    self.conf.logger.debug(sucstr)
-                else:
-                    self.conf.logger.warning('SUCCESS JOBS count is zero!')
-
-                if failcount > 0:
-                    failstr = ' FAILED JOBS:\n'
-                    for i in self.rsync.failed_jobs:
-                        failstr += "\n".join([
-                            'COMMAND:\n%s' % i[0],
-                            'STDERR:\n%s' % i[2].decode(),
-                            '', ''])
-                    self.conf.logger.error(failstr)
-
-                    if self.conf.critical_subprocess:
-                        raise FatalError(failstr)
-
-                logstr = \
-                    '%d syncs ran in %0.3f seconds (%d fail, %d success)' % (
-                        len(self.conf.enabled_jobs), timelen, failcount,
-                        successcount)
-
-                if self.conf.critical_time != 0 and \
-                        self.conf.critical_time < timelen:
-                    logstr += ' This is over %d seconds of time.' % \
-                        self.conf.critical_time
-                    logstr += ' There may be syncronization delays if'
-                    logstr += ' your crontab is set to run more frequently.'
-                    raise FatalError(logstr)
-
-                if failcount > 0:
-                    self.conf.logger.warning(logstr)
-                else:
-                    self.conf.logger.info(logstr)
-
-                # Lastly, note discrete failure codes received
-                if len(self.rsync.failed_codes) > 0:
-                    self.conf.logger.error('Rsync failure codes:\n\t%s',
-                                           '\n\t'.join(
-                                               self.rsync.failed_codes))
-
-            except KeyboardInterrupt:
-                self.conf.logger.warn('Quitting upon keyboard interupt')
-            except FatalError as err:
-                self.conf.logger.critical(err)
+            self.log_syncs(time.perf_counter() - btime)
+        except KeyboardInterrupt:
+            self.conf.logger.warning('Quit on keyboard interupt')
+        except DSRsyncError as err:
+            self.conf.logger.critical(err)
         finally:
             self.clean_pid()

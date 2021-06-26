@@ -10,14 +10,13 @@ import datetime
 import logging
 import logging.handlers
 import re
-import sys
 from itertools import chain
 from multiprocessing import cpu_count
 from pathlib import Path, PosixPath, WindowsPath
 
 from jinja2 import Template
 import yaml
-from .error import ConfigFileSyntaxError, FatalError
+from .error import DSConfigSyntaxError, DSError
 from .rsync import DSRsync
 
 
@@ -93,7 +92,7 @@ class DSConfig:
                         self.paths.log.__str__(), maxBytes=26214400,
                         backupCount=3))
         except FileNotFoundError:
-            raise FatalError('Not able to open log file %s!' % self.paths.log)
+            raise DSError('Not able to open log file %s!' % self.paths.log)
 
         # With setup complete, configure our logger
         self.__conf_log()
@@ -109,46 +108,6 @@ class DSConfig:
         # the -b option more readable.
         self.enabled_jobs.sort()
         self.disabled_jobs.sort()
-
-    def __conf_log(self):
-        '''Configure logging object for use from acqsync'''
-
-        # pass all messages down to handlers
-        self.logger.setLevel(logging.DEBUG)
-
-        # custom log formatter
-        # '[%(levelname)s] %(asctime)s %(lineno)d %(message)s'
-        formatter = logging.Formatter(
-            '%(asctime)s %(levelname)7s %(funcName)12s ' +
-            '%(threadName)10s: %(message)s')
-
-        # RotatingFileHandler logger
-        self.logconf.rfhandler.setFormatter(formatter)
-        self.logconf.rfhandler.setLevel(logging.INFO)
-        self.logger.addHandler(self.logconf.rfhandler)
-
-        # syslog logger -- commented out because it requires
-        # editing /etc/syslog.conf
-        #
-        # syslogHandler = logging.handlers.SysLogHandler()
-        # syslogHandler.setFormatter(formatter)
-        # syslogHandler.setLevel(logging.ERROR)
-        # self.logger.addHandler(syslogHandler)
-
-        # console logger
-        self.logconf.consolehandler.setLevel(logging.INFO)
-        self.logconf.consolehandler.setFormatter(formatter)
-        self.logger.addHandler(self.logconf.consolehandler)
-
-        # Tweak logger settings based on userland args
-        if self.dry_run or self.debug:
-            # Enable this script and rsync to be more chatty
-            self.logconf.rfhandler.setLevel(logging.DEBUG)
-            self.logconf.consolehandler.setLevel(logging.DEBUG)
-
-        # Disable most STDOUT and avoid general cron noise if in quiet mode
-        if self.quiet:
-            self.logconf.consolehandler.setLevel(logging.FATAL)
 
     @staticmethod
     def __conf_args():
@@ -212,13 +171,18 @@ class DSConfig:
             'shells can be more efficient and allow better ' +
             'cross-platform support, but globbing is not possible. ' +
             'Note that some strings will automatically enable shell')
-
-        agroup = parser.add_mutually_exclusive_group()
-        agroup.add_argument(
+        parser.add_argument(
             '-n', '--dry-run',
             action='store_true',
             dest='dry_run',
-            help='Conduct a dry run. Sets verbosity debug.')
+            help='Set rsync subprocess(s) to --dry-run mode.')
+
+        agroup = parser.add_mutually_exclusive_group()
+        agroup.add_argument(
+            '-b', '--build-only',
+            action='store_true',
+            dest='build_only',
+            help='Build rsync commands and log; do not `rsync --dry-run`')
         agroup.add_argument(
             '-d', '--debug',
             action='store_true',
@@ -230,12 +194,44 @@ class DSConfig:
             dest='quiet',
             help='Minor(-W/-R) or no logging to STDOUT (EG for cron).')
         agroup.add_argument(
-            '-b', '--build-only',
+            '-v', '--verbose',
             action='store_true',
-            dest='build_only',
-            help='Build rsync commands and log; do not `rsync --dry-run`')
+            dest='verbose',
+            help='Turn on verbose output.')
 
         return parser.parse_args()
+
+    def __conf_log(self):
+        '''Configure logging object for use from acqsync'''
+
+        # pass all messages down to handlers
+        self.logger.setLevel(logging.DEBUG)
+
+        # custom log formatter
+        # '[%(levelname)s] %(asctime)s %(lineno)d %(message)s'
+        formatter = logging.Formatter(
+            '%(asctime)s %(levelname)7s %(funcName)12s ' +
+            '%(threadName)10s: %(message)s')
+
+        # RotatingFileHandler logger
+        self.logconf.rfhandler.setFormatter(formatter)
+        self.logconf.rfhandler.setLevel(logging.INFO)
+        self.logger.addHandler(self.logconf.rfhandler)
+
+        # console logger
+        self.logconf.consolehandler.setLevel(logging.INFO)
+        self.logconf.consolehandler.setFormatter(formatter)
+        self.logger.addHandler(self.logconf.consolehandler)
+
+        # Tweak logger settings based on userland args
+        if self.dry_run or self.debug:
+            # Enable this script and rsync to be more chatty
+            self.logconf.rfhandler.setLevel(logging.DEBUG)
+            self.logconf.consolehandler.setLevel(logging.DEBUG)
+
+        # Disable most STDOUT and avoid general cron noise if in quiet mode
+        if self.quiet:
+            self.logconf.consolehandler.setLevel(logging.FATAL)
 
     def __open_yaml(self):
         '''Attempt to open our YAML file'''
@@ -243,10 +239,10 @@ class DSConfig:
             with open(self.paths.yaml, 'rb') as cfg:
                 myyaml = yaml.load(cfg, Loader=yaml.FullLoader)
         except IOError as err:
-            raise FatalError(
+            raise DSError(
                 'Cannot locate or open %s.' % self.paths.yaml, err)
         except ValueError as err:
-            raise ConfigFileSyntaxError(
+            raise DSConfigSyntaxError(
                 'Syntax error in targets file %s.' % self.paths.yaml,
                 err)
         return myyaml
@@ -256,25 +252,24 @@ class DSConfig:
 
         # Convert YAML to argparse.Namespace. Process required keys
         for i in ['configuration', 'items']:
-            try:
-                if i == 'configuration':  # Process subkeys in config
-                    for j in ['cruise', 'paths', 'rsync']:
-                        if j == 'cruise':
-                            setattr(self, j,
-                                    self.parse_cruise(self.yaml[i][j]))
-                        elif j == 'paths':
-                            for key, val in self.yaml[i][j].items():
-                                setattr(self.paths, key, val)
-                        else:
-                            setattr(self, j,
-                                    argparse.Namespace(**self.yaml[i][j]))
-                else:
-                    # root key "items" (and future)
-                    setattr(self, i, argparse.Namespace(**self.yaml[i]))
-            except AttributeError as err:
-                raise ConfigFileSyntaxError(
-                    'root key "%s" is not defined in %s! Exit.' %
-                    (i, self.paths.yaml), err)
+            if i not in self.yaml:
+                raise DSConfigSyntaxError(
+                    'root key "%s" is not defined in %s!' %
+                    (i, self.paths.yaml))
+            if i == 'configuration':  # Process subkeys in config
+                try:
+                    setattr(self, 'cruise', self.parse_cruise(
+                        self.yaml[i]['cruise']))
+                    setattr(self, 'rsync', argparse.Namespace(
+                        **self.yaml[i]['rsync']))
+                    for key, val in self.yaml[i]['paths'].items():
+                        setattr(self.paths, key, val)
+                except (KeyError, AttributeError) as err:
+                    raise DSConfigSyntaxError(
+                        'unexpected attribute or key: %s' % err)
+            else:
+                # root key "items" (and future)
+                setattr(self, i, argparse.Namespace(**self.yaml[i]))
 
         # Normalize/validate rsync path
         try:
@@ -290,8 +285,7 @@ class DSConfig:
         # Normalize rsync options
         try:
             if not isinstance(self.rsync.options, dict):
-                raise(ConfigFileSyntaxError,
-                      'self.rsync.options not a dict()!')
+                raise DSConfigSyntaxError('self.rsync.options not a dict()!')
         except AttributeError:
             self.rsync.options = self.rsyncopts
 
@@ -308,7 +302,7 @@ class DSConfig:
                 if isinstance(item.filter_date, str):
                     item.filter_date = Path(item.filter_date)
                 else:
-                    raise ConfigFileSyntaxError(
+                    raise DSConfigSyntaxError(
                         'filter_date must be a string')
             except AttributeError:
                 pass
@@ -356,7 +350,8 @@ class DSConfig:
             finally:
                 self._item_build_job(key, item)  # Build singleton job
 
-    def templatize(self, mystr, namespaces={}):
+    @staticmethod
+    def templatize(mystr, namespaces={}):
         '''Apply Jinja2 expansion to a string and return.'''
         template = Template(mystr)
         return template.render(**namespaces)
@@ -365,24 +360,25 @@ class DSConfig:
         '''Build an rsync job from a argparse.Namespace object and a name.
            Append to self.*jobs when done.'''
 
-        ns = {'cruise': self.cruise, 'paths': self.paths, 'rsync': self.rsync}
+        namespace = {'cruise': self.cruise, 'paths': self.paths,
+                     'rsync': self.rsync}
 
         # Register a need to make parent dir(s) when they do not exist
         # after running rname through Jinja2 templating engine
-        pdir = Path(self.templatize(item.dst, ns)).parent
+        pdir = Path(self.templatize(item.dst, namespace)).parent
         if not pdir.is_dir():
             self.makedirs.add(pdir)
 
         # Merge main and specific dicts(); override shell as needed
         opts, item.shell = self.dsrsync.parse_rsyncopts(
             {**self.rsync.options, **item.options},
-            self.dry_run, self.debug, item.shell)
+            self.dry_run, self.debug, self.quiet, self.verbose, item.shell)
 
         # Build job using list() + chain() to create a flattened list.
         job = list(chain([self.rsync.path], opts, [item.src, item.dst]))
 
         # Run job list through Jinja2 templating engine
-        job = [self.templatize(x, ns) for x in job]
+        job = [self.templatize(x, namespace) for x in job]
 
         # Job is tuple(cmd, shell) to pass to Pool.starmap()
         # Whether enabled or not, we want to render/test/log
@@ -415,17 +411,16 @@ class DSConfig:
         # Confirm valid data types
         for i in item.__dict__.keys():
             if i not in supported_keys:
-                raise ConfigFileSyntaxError(
+                raise DSConfigSyntaxError(
                     '"%s" is not a supported item parameter.' % i)
 
             if not isinstance(getattr(item, i), supported_types[i]):
-                raise ConfigFileSyntaxError(
+                raise DSConfigSyntaxError(
                     'Expected %s data type for items.%s.%s.' % (
                         supported_types[i], key, i))
 
-            # Special Case: convert src/dst str to Path
             if i in ('src', 'dst'):
-                setattr(item, i, str(getattr(item, i)))
+                setattr(item, i, str(getattr(item, i)))  # ensure str
 
         # Special Case: prepend relative item
         try:
@@ -438,21 +433,20 @@ class DSConfig:
 
     @staticmethod
     def parse_cruise(cdict,
-                     params=['begin', 'end', 'id', 'sync_run'],
+                     params=('begin', 'end', 'id', 'sync_run'),
                      pattern='^[A-Z]{2,3}([0-9]{4}|port)$'):
         '''confirm cruise metadata settings follow a certain schema'''
-        keys = sorted(cdict.keys())
+        keys = tuple(sorted(cdict.keys()))
 
-        # Confirm that we received only the cruise parameters we expect.
+        # Confirm that we received only the cruise parameters we expect
         if keys != params:
-            raise ConfigFileSyntaxError(
+            raise DSConfigSyntaxError(
                 'Supported Cruise parameters are %s. Got %s' %
                 (params, keys))
-            sys.exit(10)
 
         for i in params:
             try:
-                if i in ['begin', 'end']:
+                if i in ('begin', 'end'):
                     # Convert date to datetime.date type.
                     # Typically, ISO-style dates get automagically
                     # converted when the YAML is imported, but we
@@ -464,16 +458,16 @@ class DSConfig:
                     # EG RRport, HLY1234, SP4321
                     match = re.search(pattern, cdict[i])
                     if not match:
-                        raise ConfigFileSyntaxError(
+                        raise DSConfigSyntaxError(
                             'Cruise id "%s" must match pattern "%s". Exit.' %
                             (cdict[i], pattern))
                 elif i == 'sync_run':
                     # Ensure sync_run is defined and a bool
                     if not isinstance(cdict[i], bool):
-                        raise ConfigFileSyntaxError(
+                        raise DSConfigSyntaxError(
                             'Cruise sync_run must be defined and a boolean')
             except KeyError:
-                raise ConfigFileSyntaxError(
+                raise DSConfigSyntaxError(
                     'Required cruise parameter "%s" is not defined. Exit.' % i)
 
         return argparse.Namespace(**cdict)

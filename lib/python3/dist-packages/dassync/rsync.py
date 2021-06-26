@@ -6,7 +6,8 @@ import subprocess
 from pathlib import Path
 from shlex import quote
 from urllib.parse import urlparse
-from .error import ConfigFileSyntaxError, FatalError
+from .error import DSConfigTargetError, DSConfigSyntaxError, \
+        DSRsyncError, DSError
 
 
 class DSRsync:
@@ -115,23 +116,32 @@ class DSRsync:
         self.failed_jobs = []
         self.success_jobs = []
 
-    def parse_rsyncopts(self, opts_dict, dry_run, debug, shell=False):
+    def parse_rsyncopts(self, opts_dict, dry_run, debug, quiet, verbose,
+                        shell=False):
         '''Convert a dict of rsync options to an array of rsync CLI
            options, verifying them against cached valid options from
            `man rsync`.'''
         opts_list = []
 
-        # Override rsync verbosity, based on CLI args
-        if dry_run or debug:
-            opts_dict['quiet'] = False
-            opts_dict['verbose'] = True
+        if dry_run:
+            opts_dict['dry-run'] = True
 
-            if dry_run:
-                # Override rsync copying behavior
-                opts_dict['dry-run'] = True
-        else:
-            # Override rsync verbosity: only print errors to console
+        # Override rsync verbosity, based on CLI args
+        if debug:
+            opts_dict['quiet'] = False
+            opts_dict['stats'] = True
+            opts_dict['verbose'] = True
+        elif quiet:
             opts_dict['quiet'] = True
+            opts_dict['stats'] = False
+            opts_dict['verbose'] = False
+        elif verbose:
+            opts_dict['quiet'] = False
+            opts_dict['stats'] = False
+            opts_dict['verbose'] = True
+        else:
+            opts_dict['quiet'] = False
+            opts_dict['stats'] = True
             opts_dict['verbose'] = False
 
         # We want our command built with alphanumerically sorting, but
@@ -144,11 +154,11 @@ class DSRsync:
         for key, val in sorted(opts_dict.items()):
             try:
                 if not isinstance(val, self.RSYNC_OPTIONS_VALID[key]):
-                    raise ConfigFileSyntaxError(
+                    raise DSConfigSyntaxError(
                         'rsync option "%s" requires data type %s.\n' % (
                             key, self.RSYNC_OPTIONS_VALID[key]))
             except KeyError:
-                raise ConfigFileSyntaxError(
+                raise DSConfigSyntaxError(
                     'Unsupported rsync option "%s".\n' % key +
                     'Valid options are %s' %
                     ', '.join(self.RSYNC_OPTIONS_VALID.keys()))
@@ -178,16 +188,17 @@ class DSRsync:
         '''Determine if we got a valid rsync src or dst'''
 
         if not isinstance(target, str):
-            raise FatalError('rsync target %s must be a string' % target)
+            raise DSConfigTargetError('rsync target %s must be a string' %
+                                      target)
 
         # Not valid rsync URI syntax nor Path syntax
         if urlparse(target).scheme != 'rsync' and not \
                 target.starts_with(Path(target).__str__()):
-            raise FatalError(
+            raise DSConfigTargetError(
                 'Unsupported rsync target "%s". Use URI or Path syntax' %
                 target)
 
-    def rsync_thread(self, command, shell=True):
+    def rsync_thread(self, command, shell=True, logger=None):
         '''Execute single rsync command via subprocess and return
            results the results.  This method is designed to be called
            using multithreading'''
@@ -198,7 +209,7 @@ class DSRsync:
         if isinstance(cmdstr, list):
             cmdstr = ' '.join(command)
         elif not isinstance(cmdstr, str):
-            raise FatalError('command for rsync must be list() or str()')
+            raise DSError('command for rsync must be list() or str()')
 
         if shell is False:
             cmd = command  # list not string, here
@@ -207,45 +218,44 @@ class DSRsync:
             mythread.name = mythread.name.replace('Thread', 'Shell')
             cmd = cmdstr   # string not list, here
 
-        capture = subprocess.run(cmd, stdout=subprocess.PIPE,
+        logstr = 'JOB: "%s"...\nExited with return code %d. Output:\n%s'
+        try:
+            run = subprocess.run(cmd, check=True, stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE, shell=shell)
-        if capture.returncode == 0:
-            self.success_jobs.append((cmdstr, capture.stdout,
-                                      capture.stderr, capture.returncode))
-        else:
+        except subprocess.CalledProcessError:
             # Raise an exception later; just warn for now.
-            self.failed_jobs.append((cmdstr, capture.stdout,
-                                     capture.stderr, capture.returncode))
-            self.failed_codes.add(
-                self.RSYNC_RETURN_CODES[capture.returncode])
+            logger.warning(logstr, run.args, run.returncode,
+                           run.stderr.decode())
+            self.failed_jobs.append(run)
+            self.failed_codes.add(self.RSYNC_RETURN_CODES[run.returncode])
+        else:
+            logger.info(logstr, run.args, run.returncode, run.stdout.decode())
+            self.success_jobs.append(run)
 
     @staticmethod
     def rsync_version():
         '''Determine if rsync is available as a callable CLI command'''
         try:
-            capture = subprocess.run(['rsync', '--version'],
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE)
+            run = subprocess.run(('rsync', '--version'),
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 check=True)
+        except subprocess.CalledProcessError as err:
+            raise DSRsyncError('%s' % err)
         except FileNotFoundError as err:
-            raise FatalError('%s' % err)
-        else:
-            if capture.returncode != 0:
-                raise FatalError('rsync --version not working')
-            if bool(capture.stderr):
-                raise FatalError(
-                    'rsync does not appear to be installed/available')
+            raise DSRsyncError('%s' % err)
 
         version = re.search(r"version\s+(\d+\.\d+\.\d+)",
-                            capture.stdout.decode("utf8")).groups()[0]
+                            run.stdout.decode("utf8")).groups()[0]
         if not isinstance(version, str):
-            raise FatalError(
+            raise DSError(
                 'rsync does not appear to be installed/available')
 
         # We need protocol too for potenial batch operations
-        protocol = int(re.search(r"protocol version\s+(\d+)",
-                                 capture.stdout.decode("utf8")).groups()[0])
+        protocol = int(re.search(r"protocol\s+version\s+(\d+)",
+                                 run.stdout.decode("utf8")).groups()[0])
 
-        return (version, int(protocol))
+        return (version, protocol)
 
     @staticmethod
     def shellquote(value, shell):
