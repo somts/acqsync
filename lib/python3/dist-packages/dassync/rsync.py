@@ -218,7 +218,7 @@ class DSRsync:
             mythread.name = mythread.name.replace('Thread', 'Shell')
             cmd = cmdstr   # string not list, here
 
-        logstr = 'JOB: "%s"...\nExited with return code %d. Output:\n%s'
+        logstr = 'JOB: "%s" exited with return code %d. Output:\n%s'
         try:
             run = subprocess.run(cmd, check=True, stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE, shell=shell)
