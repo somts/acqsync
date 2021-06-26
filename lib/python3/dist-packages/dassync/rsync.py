@@ -207,19 +207,17 @@ class DSRsync:
             mythread.name = mythread.name.replace('Thread', 'Shell')
             cmd = cmdstr   # string not list, here
 
-        with subprocess.Popen(cmd,
-                              shell=shell,
-                              stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE) as proc:
-            stdout, stderr = proc.communicate()
-            retcode = proc.poll()
-
-            if retcode == 0:
-                self.success_jobs.append((cmdstr, stdout, stderr, retcode))
-            else:
-                # Raise an exception later; just warn for now.
-                self.failed_jobs.append((cmdstr, stdout, stderr, retcode))
-                self.failed_codes.add(self.RSYNC_RETURN_CODES[retcode])
+        capture = subprocess.run(cmd, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, shell=shell)
+        if capture.returncode == 0:
+            self.success_jobs.append((cmdstr, capture.stdout,
+                                      capture.stderr, capture.returncode))
+        else:
+            # Raise an exception later; just warn for now.
+            self.failed_jobs.append((cmdstr, capture.stdout,
+                                     capture.stderr, capture.returncode))
+            self.failed_codes.add(
+                self.RSYNC_RETURN_CODES[capture.returncode])
 
     @staticmethod
     def rsync_version():
