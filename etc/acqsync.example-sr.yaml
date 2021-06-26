@@ -1,14 +1,17 @@
 ---
 configuration:
   cruise:
-    id: SRport
-    begin: 2020-12-28  # ISO format date
-    end: 2021-01-03    # ISO format date
+    begin: 2021-06-26  # ISO format date
+    end: 2021-07-07    # ISO format date
+    id: SR2104
+    operator: Scripps Institution of Oceanography
+    ports: ['Alameda, CA', 'San Diego, CA']
     sync_run: true     # false to disable sync of all items
+    vessel: R/V Sally Ride
   paths:
-    dstbase: '/share/cruise/{{ cruise.id }}'
-    log: '/share/cruise/acqsync.{{ cruise.id }}.log'
-    pid: /tmp/acqsync.pid
+    dstbase: '/share/cruise/acqsync_testing/{{ cruise.id }}'
+    log: '/share/cruise/acqsync_testing/{{ cruise.id }}/meta/acqsync.log'
+    pid: /var/tmp/acqsync.pid
   rsync:
     path: /usr/bin/rsync
     # Options will expand to rsync command-line options.
@@ -27,8 +30,6 @@ configuration:
       one-file-system: true
       recursive: true
       specials: true
-      stats: true
-      time-limit: 14  # minutes
       timeout: 120
       times: true
       whole-file: true
@@ -48,6 +49,11 @@ configuration:
 #       generally catch this with "{{ cruise.id}}*" instead of
 #       "{{ cruise.id }}/". Be on the lookout for this.
 items:
+  # This config
+  '{{ paths.yaml }}':
+    enable: true
+    dst: 'meta/acqsync.{{ cruise.id }}.yaml'
+    options: {contimeout: false}
   # UHDAS
   'rsync://sr-currents.ucsd.edu/data/{{ cruise.id }}*':
     enable: true
@@ -74,13 +80,13 @@ items:
         - '+ /tp/'
         - '+ /tp/tp_S224_*'  # S224 SR test point data
   # CTD
-  'rsync://sr-ctd.ucsd.edu/ctd_data/{{ cruise.id }}/':
+  'rsync://sr-ctd.ucsd.edu/data/{{ cruise.id }}/':
     enable: true
     dst: data/ctd/data/
-  'rsync://sr-ctd.ucsd.edu/ctd_software/':
+  'rsync://sr-ctd.ucsd.edu/software/':
     enable: true
     dst: software/ctd/
-  'rsync://sr-ctd.ucsd.edu/ctd_manuals/':
+  'rsync://sr-ctd.ucsd.edu/manuals/':
     enable: true
     dst: data/ctd/docs/
     options:
@@ -98,7 +104,7 @@ items:
         - '- *'
   # Please alter the source computer's "Manuals" dirname to "Seabird".
   # Then, delete this module as the above will catch Seabird
-  'rsync://sr-ctd.ucsd.edu/ctd_manuals/Manuals/':
+  'rsync://sr-ctd.ucsd.edu/manuals/Manuals/':
     enable: true
     dst: data/ctd/docs/Seabird/
   # Knudsen 3260 3.5/12kHz data.
@@ -196,7 +202,6 @@ items:
   # MET
   'rsync://sr-met.ucsd.edu/data/':
     enable: true
-    shell: true
     dst: data/met/
     options:
       filter:
@@ -214,7 +219,7 @@ items:
   # MOSAIC - not installed
   'rsync://sr-mosaic-pc.ucsd.edu/data/':
     enable: false
-    dst: data/multibeam/mosaic/
+    dst: data/mosaic/
     options:
       filter:
         - '+ /{{ cruise.id }}/em124/'
@@ -222,7 +227,7 @@ items:
         - '- *'
   'rsync://sr-mosaic-pc.ucsd.edu/rawdata/':
     enable: false
-    dst: data/multibeam/mosaic/data/
+    dst: data/mosaic/data/
     options:
       filter:
         - '+ /{{ cruise.id }}-em124/'
@@ -251,21 +256,20 @@ items:
   # STS seriallogger (future: OpenRVDAS)
   'rsync://sr-serial1.ucsd.edu/SerialInstruments/seriallogger.conf':
     enable: true
-    dst: data/SerialInstruments/
+    dst: data/serialinstruments/seriallogger.conf
   'rsync://sr-serial1.ucsd.edu/SerialInstruments/{{ cruise.id }}/':
     enable: true
-    dst: data/SerialInstruments/
+    dst: data/serialinstruments/
   # XBT (Turo)
   'rsync://sr-xbt.ucsd.edu/xbt-data/{{ cruise.id }}/':
     enable: true
     dst: data/xbt/data/
   'rsync://sr-xbt.ucsd.edu/xbt-docs/*.pdf':
     enable: true
-    shell: true
     dst: data/xbt/docs/
   # WAMOS
   'rsync://sr-wamos-acq.ucsd.edu/data/RESULTS':
-    enable: true
+    enable: false
     dst: data/wamos/
     filter_date: '/%Y/%m/%d/'
   'rsync://sr-wamos-raid.ucsd.edu/data/POLAR':

@@ -364,9 +364,10 @@ class DSConfig:
                      'rsync': self.rsync}
 
         # Register a need to make parent dir(s) when they do not exist
-        # after running rname through Jinja2 templating engine
+        # after running rname through Jinja2 templating engine. This
+        # should only apply to enabled items.
         pdir = Path(self.templatize(item.dst, namespace)).parent
-        if not pdir.is_dir():
+        if not pdir.is_dir() and item.enable:
             self.makedirs.add(pdir)
 
         # Merge main and specific dicts(); override shell as needed
@@ -433,7 +434,8 @@ class DSConfig:
 
     @staticmethod
     def parse_cruise(cdict,
-                     params=('begin', 'end', 'id', 'sync_run'),
+                     params=('begin', 'end', 'id', 'operator', 'ports',
+                             'sync_run', 'vessel'),
                      pattern='^[A-Z]{2,3}([0-9]{4}|port)$'):
         '''confirm cruise metadata settings follow a certain schema'''
         keys = tuple(sorted(cdict.keys()))

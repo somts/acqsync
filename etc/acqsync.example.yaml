@@ -9,10 +9,13 @@
 ---
 configuration:
   cruise:
+    begin: 2020-12-26  # ISO format date
+    end: 2021-01-07    # ISO format date
     id: XXport
-    begin: 2021-01-01  # ISO format date
-    end: 2021-01-31    # ISO format date
+    operator: University of Best Operator Ever
+    ports: ['Anytown, USA', 'Nowheresville, CA']
     sync_run: true     # false to disable sync of all items
+    vessel: R/V Example Vessel
   paths:
     dstbase: '/tmp/{{ cruise.id }}'
     pid: /tmp/acqsync.pid

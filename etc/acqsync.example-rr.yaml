@@ -6,10 +6,13 @@
 ---
 configuration:
   cruise:
+    begin: 2020-12-26  # ISO format date
+    end: 2021-01-07    # ISO format date
     id: RRport
-    begin: 2020-12-28  # ISO format date
-    end: 2021-01-03    # ISO format date
+    operator: Scripps Institution of Oceanography
+    ports: ['San Diego, CA', 'San Diego, CA']
     sync_run: true     # false to disable sync of all items
+    vessel: R/V Roger Revelle
   paths:
     dstbase: '/share/cruise/{{ cruise.id }}'
     log: '/share/cruise/acqsync.{{ cruise.id }}.log'
