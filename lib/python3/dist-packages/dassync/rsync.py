@@ -222,12 +222,12 @@ class DSRsync:
         try:
             run = subprocess.run(cmd, check=True, stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE, shell=shell)
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError as err:
             # Raise an exception later; just warn for now.
-            logger.warning(logstr, run.args, run.returncode,
-                           run.stderr.decode())
-            self.failed_jobs.append(run)
-            self.failed_codes.add(self.RSYNC_RETURN_CODES[run.returncode])
+            logger.warning(logstr, err.cmd, err.returncode,
+                           err.stderr.decode())
+            self.failed_jobs.append(err)
+            self.failed_codes.add(self.RSYNC_RETURN_CODES[err.returncode])
         else:
             logger.info(logstr, run.args, run.returncode, run.stdout.decode())
             self.success_jobs.append(run)
