@@ -226,11 +226,14 @@ class DSRsync:
         '''Determine if rsync is available as a callable CLI command'''
         try:
             capture = subprocess.run(['rsync', '--version'],
-                                     capture_output=True, check=False)
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE)
         except FileNotFoundError as err:
             raise FatalError('%s' % err)
         else:
-            if capture.returncode or capture.stderr:
+            if capture.returncode != 0:
+                raise FatalError('rsync --version not working')
+            if bool(capture.stderr):
                 raise FatalError(
                     'rsync does not appear to be installed/available')
 

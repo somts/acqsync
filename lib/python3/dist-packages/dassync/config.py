@@ -69,11 +69,11 @@ class DSConfig:
 
         # Normalize self.paths variables to Path types after allowing
         # our templating engine to expand cruise variables.
-        ns = {'cruise': self.cruise}
+        namespace = {'cruise': self.cruise}
         for key, val in self.paths.__dict__.items():
             if isinstance(val, Path):
                 val = val.__str__()
-            setattr(self.paths, key, Path(self.templatize(val, ns)))
+            setattr(self.paths, key, Path(self.templatize(val, namespace)))
 
         # Set up logger, post CLI/YAML eval
         self.logconf = argparse.Namespace(
@@ -150,7 +150,8 @@ class DSConfig:
         if self.quiet:
             self.logconf.consolehandler.setLevel(logging.FATAL)
 
-    def __conf_args(self):
+    @staticmethod
+    def __conf_args():
         '''parse STDIN, if any'''
 
         parser = argparse.ArgumentParser(
@@ -262,8 +263,8 @@ class DSConfig:
                             setattr(self, j,
                                     self.parse_cruise(self.yaml[i][j]))
                         elif j == 'paths':
-                            for k, v in self.yaml[i][j].items():
-                                setattr(self.paths, k, v)
+                            for key, val in self.yaml[i][j].items():
+                                setattr(self.paths, key, val)
                         else:
                             setattr(self, j,
                                     argparse.Namespace(**self.yaml[i][j]))
@@ -423,16 +424,16 @@ class DSConfig:
                         supported_types[i], key, i))
 
             # Special Case: convert src/dst str to Path
-            if i == 'src' or i == 'dst':
+            if i in ('src', 'dst'):
                 setattr(item, i, str(getattr(item, i)))
 
         # Special Case: prepend relative item
         try:
             if self.paths.dstbase and not Path(item.dst).is_absolute():
-                item.dst = Path(self.paths.dstbase).joinpath(item.dst).__str__()
+                item.dst = Path(
+                    self.paths.dstbase).joinpath(item.dst).__str__()
         except AttributeError as err:
             print(err)
-            pass
         return item
 
     @staticmethod
