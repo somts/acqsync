@@ -117,7 +117,7 @@ class DSRsync:
         self.success_jobs = []
 
     def parse_rsyncopts(self, opts_dict, dry_run, debug, quiet, verbose,
-                        shell=False):
+                        shell=True):
         '''Convert a dict of rsync options to an array of rsync CLI
            options, verifying them against cached valid options from
            `man rsync`.'''
@@ -127,24 +127,16 @@ class DSRsync:
             opts_dict['dry-run'] = True
 
         # Override rsync verbosity, based on CLI args
-        if debug:
+        if debug or verbose:
             opts_dict['quiet'] = False
             opts_dict['stats'] = True
-            opts_dict['verbose'] = True
-        elif quiet:
-            opts_dict['quiet'] = True
-            opts_dict['stats'] = False
-            opts_dict['verbose'] = False
-        elif verbose:
-            opts_dict['quiet'] = False
-            opts_dict['stats'] = False
             opts_dict['verbose'] = True
         else:
-            opts_dict['quiet'] = False
-            opts_dict['stats'] = True
+            opts_dict['quiet'] = False  # want output in log file
+            opts_dict['stats'] = True   # output should just be stats
             opts_dict['verbose'] = False
 
-        # We want our command built with alphanumerically sorting, but
+        # We want our command built with alphanumeric sorting, but
         # we do not want to disturb the ordering of list() items that
         # can be called multiple times, such as --filter, --include,
         # --exclude, which depend on specific ordering to affect

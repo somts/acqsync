@@ -224,13 +224,13 @@ class DSConfig:
         self.logger.addHandler(self.logconf.consolehandler)
 
         # Tweak logger settings based on userland args
-        if self.dry_run or self.debug:
+        if self.debug:
             # Enable this script and rsync to be more chatty
             self.logconf.rfhandler.setLevel(logging.DEBUG)
             self.logconf.consolehandler.setLevel(logging.DEBUG)
 
-        # Disable most STDOUT and avoid general cron noise if in quiet mode
-        if self.quiet:
+        elif self.quiet:
+            # Disable most STDOUT to avoid cron noise
             self.logconf.consolehandler.setLevel(logging.FATAL)
 
     def __open_yaml(self):
