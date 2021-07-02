@@ -1,0 +1,283 @@
+---
+configuration:
+  cruise:
+    begin: 2021-06-26  # ISO format date
+    end: 2021-07-07    # ISO format date
+    id: SR2104
+    operator: Scripps Institution of Oceanography
+    ports: ['Alameda, CA', 'San Diego, CA']
+    sync_run: true     # false to disable sync of all items
+    vessel: R/V Sally Ride
+  paths:
+    dstbase: '/share/cruise/acqsync_testing/{{ cruise.id }}'
+    log: '/share/cruise/acqsync_testing/{{ cruise.id }}/meta/acqsync.log'
+    pid: /var/tmp/acqsync.pid
+  rsync:
+    path: /usr/bin/rsync
+    # Options will expand to rsync command-line options.
+    # NOTE: only long options, EG --option (not -o), are supported.
+    #       See `man rsync` for details
+    # Behavior depends on data type:
+    #   Boolean         : --key (on true)
+    #   Array/List      : --key="arr[0]" [--key="arr[1]" --key="arr[2]" etc]
+    #   String/Int/Float: --key="value"
+    options:
+      chmod: 'Dg+st,ugo+rx,Fo-w,+X'
+      contimeout: 10
+      exclude: [.DS_Store, .TemporaryItems/, .Trash*/, ._*, Thumbs.db]
+      human-readable: true
+      links: true
+      one-file-system: true
+      recursive: true
+      specials: true
+      timeout: 120
+      times: true
+      whole-file: true
+# A design goal of items is to connect to the same host as few times as
+# practicable, avoiding bogging down DAS hosts. As such, the fewer
+# items declared that connect to the same host, the better. This can
+# mean leaning into the --filter mechanism to express complex ACLs.
+#
+# NOTE: we also have an acqsync-specific "filter_date" parameter, which
+#       constructs filter(s) based on cruise.begin and cruise.end
+# NOTE: Jinja2 templates are allowed, allowing for strings such as
+#       {{ cruise.id }} to expand to the currently set value.
+# NOTE: if a relative dst path is detected, acqsync will automatically
+#       prepend with {{ paths.dstbase }}.
+# NOTE: Trailing slashes on src arguments affect behavior! CAUTION.
+# NOTE: Some systems often require multiple surveys per cruise. We
+#       generally catch this with "{{ cruise.id}}*" instead of
+#       "{{ cruise.id }}/". Be on the lookout for this.
+items:
+  # This config
+  '{{ paths.yaml }}':
+    enable: true
+    dst: 'meta/acqsync.{{ cruise.id }}.yaml'
+    options: {contimeout: false}
+  # UHDAS
+  'rsync://sr-currents.ucsd.edu/data/{{ cruise.id }}*':
+    enable: true
+    dst: data/adcp/
+  'rsync://sr-currents.ucsd.edu/vm/':  # VirtualBox VM (post-processing)
+    enable: false
+    dst: software/adcp/
+  # UHDAS EC150/OS150 experimentation
+  'rsync://sr-currents-octopus.ucsd.edu/data/{{ cruise.id }}*':
+    enable: true
+    dst: data/adcp_ec150/
+  # BGM-3
+  'rsync://sr-gravity-bgm3.ucsd.edu/data/':
+    enable: true
+    dst: data/gravity/
+    filter_date: '/logs/%Y%m%d*'
+    options:
+      filter:  # filter_date gets appended to this
+        - '+ /eng/'
+        - '+ /eng/*_S224_*'  # S224 SR damp/testing roll/pitch data
+        - '+ /gt/'
+        - '+ /gt/gt_S224_*'  # S224 SR gravtie data
+        - '+ /logs/'
+        - '+ /tp/'
+        - '+ /tp/tp_S224_*'  # S224 SR test point data
+  # CTD
+  'rsync://sr-ctd.ucsd.edu/data/{{ cruise.id }}/':
+    enable: true
+    dst: data/ctd/data/
+  'rsync://sr-ctd.ucsd.edu/software/':
+    enable: true
+    dst: software/ctd/
+  'rsync://sr-ctd.ucsd.edu/manuals/':
+    enable: true
+    dst: data/ctd/docs/
+    options:
+      filter:
+        - '+ *.pdf'
+        - '+ 3rd/'
+        - '+ APPnotes/'
+        - '+ Benthos/'
+        - '+ CTDsetup.txt'
+        - '+ Drawing/'
+        - '+ PAR/'
+        - '+ Seabird/'
+        - '+ Seapoint/'
+        - '+ Wetlabs/'
+        - '- *'
+  # Please alter the source computer's "Manuals" dirname to "Seabird".
+  # Then, delete this module as the above will catch Seabird
+  'rsync://sr-ctd.ucsd.edu/manuals/Manuals/':
+    enable: true
+    dst: data/ctd/docs/Seabird/
+  # Knudsen 3260 3.5/12kHz data.
+  'rsync://sr-echo.ucsd.edu/sgg_data/{{ cruise.id }}/':
+    enable: true
+    dst: data/echosounder-knudsen/3260/
+  'rsync://sr-echo.ucsd.edu/sgg_software/':
+    enable: true
+    dst: software/echosounder-knudsen/
+    options:
+      filter: ['+ ConversionUtility.exe', '+ PostSurvey.exe', '- *']
+  # SBP-29
+  'rsync://sr-echo-sbp.ucsd.edu/data/TOPAS_RAW':
+    enable: true
+    dst: data/echosounder-sbp29/data/
+    filter_date: '/%Y%m%d*'
+  'rsync://sr-echo-sbp.ucsd.edu/data/SGY_Processed':
+    enable: true
+    dst: data/echosounder-sbp29/data/
+    filter_date: '/%Y%m%d*'
+  # EK80
+  # NOTE: host sr-ek80-bak could be used if primary system is down
+  'rsync://sr-ek80.ucsd.edu/data/{{ cruise.id }}/':
+    enable: true
+    dst: data/ek80/data/
+  'rsync://sr-ek80.ucsd.edu/data/Calibration':
+    enable: false
+    dst: data/ek80/
+  'rsync://sr-ek80.ucsd.edu/auto_screendumps':
+    enable: false
+    dst: data/ek80/
+    filter_date: '/%Y%m%d*'
+  # EM124
+  # NOTE: .KMALL and .WCD files will both collect in the same data directory.
+  'rsync://sr-em124-sis.ucsd.edu/data/{{ cruise.id }}*':
+    enable: true
+    dst: data/multibeam-em124/rawdata/
+  'rsync://sr-em124-sis.ucsd.edu/bist/':
+    enable: true
+    dst: data/multibeam-em124/bist/
+  'rsync://sr-em124-sis.ucsd.edu/ssp/':
+    enable: true
+    dst: data/multibeam-em124/ssp/
+    filter_date: '/%Y%m%d*'
+  'rsync://sr-em124-sis.ucsd.edu/pu_param/':
+    enable: true
+    dst: data/multibeam-em124/pu_param/
+  'rsync://sr-em124-sis.ucsd.edu/software/':
+    enable: true
+    dst: data/multibeam-em124/software/
+  'rsync://sr-em124-sis.ucsd.edu/user_settings/':
+    enable: false
+    dst: data/multibeam-em124/user_settings/
+  'rsync://sr-em124-sis.ucsd.edu/pictures/{{ cruise.id }}/':
+    # Make {{ cruise.id }} dir in E:\sisdata\common\screendumps
+    enable: true
+    dst: data/multibeam-em124/pictures/
+  # EM712
+  # NOTE: .KMALL and .WCD files will both collect in the same data directory.
+  'rsync://sr-em712-sis.ucsd.edu/data/{{ cruise.id }}*':
+    enable: true
+    dst: data/multibeam-em712/rawdata/
+  'rsync://sr-em712-sis.ucsd.edu/bist/':
+    enable: true
+    dst: data/multibeam-em712/bist/
+  'rsync://sr-em712-sis.ucsd.edu/ssp/':
+    enable: true
+    dst: data/multibeam-em712/ssp/
+    filter_date: '/%Y%m%d*'
+  'rsync://sr-em712-sis.ucsd.edu/pu_param/':
+    enable: true
+    dst: data/multibeam-em712/pu_param/
+  'rsync://sr-em712-sis.ucsd.edu/software/':
+    enable: true
+    dst: data/multibeam-em712/software/
+  'rsync://sr-em712-sis.ucsd.edu/user_settings/':
+    enable: false
+    dst: data/multibeam-em712/user_settings/
+  'rsync://sr-em712-sis.ucsd.edu/pictures/{{ cruise.id }}/':
+    # Make {{ cruise.id }} dir in E:\sisdata\common\screendumps
+    enable: true
+    dst: data/multibeam-em712/pictures/
+  # HiPAP
+  'rsync://sr-hipap-apos.ucsd.edu/data/':
+    enable: true
+    filter_date: '/APOS_%Y%m%d*.png'
+    dst: data/hipap/pictures/
+  'rsync://sr-hipap-apos.ucsd.edu/manuals/':
+    enable: true
+    dst: data/hipap/docs/
+  # Mag, exported from BOB
+  'rsync://sr-magnetometer.ucsd.edu/data/{{ cruise.id }}/':
+    enable: false
+    dst: data/magnetometer/bob/
+  # MET
+  'rsync://sr-met.ucsd.edu/data/':
+    enable: true
+    dst: data/met/
+    options:
+      filter:
+        - '+ *.[Aa][Cc][Qq]'
+        - '+ /{{ cruise.id }}*/'
+        - '- *'
+  'rsync://sr-met.ucsd.edu/manuals/':
+    enable: true
+    dst: data/met/docs/
+  # MOCNESS: run when aboard and in use.
+  mocness:
+    src: rsync://sr-ctd.ucsd.edu/mocness_data/
+    dst: data/mocness/data/
+    enable: false
+  # MOSAIC - not installed
+  'rsync://sr-mosaic-pc.ucsd.edu/data/':
+    enable: false
+    dst: data/mosaic/
+    options:
+      filter:
+        - '+ /{{ cruise.id }}/em124/'
+        - '+ /{{ cruise.id }}/em712/'
+        - '- *'
+  'rsync://sr-mosaic-pc.ucsd.edu/rawdata/':
+    enable: false
+    dst: data/mosaic/data/
+    options:
+      filter:
+        - '+ /{{ cruise.id }}-em124/'
+        - '+ /{{ cruise.id }}-em712/'
+        - '- *'
+  # PCO2
+  'rsync://sr-pco2.ucsd.edu/data/':
+    enable: false
+    dst: data/pco2/data/
+    filter_date: '%Y-%j*'
+  'rsync://sr-pco2.ucsd.edu/settings/':
+    enable: false
+    dst: data/pco2/docs/
+    options:
+      filter:
+        - '+ *.[Dd][Ll][Ll]'
+        - '+ *.dat'
+        - '+ *.doc'
+        - '+ *.ini'
+        - '+ *.txt'
+        - '- *'
+  # SeaSoar: Currently not configured; run when in use.
+  'rsync://sr-seasoar.ucsd.edu/data/{{ cruise.id }}/':
+    enable: false
+    dst: data/seasoar/data/
+  # STS seriallogger (future: OpenRVDAS)
+  'rsync://sr-serial1.ucsd.edu/SerialInstruments/seriallogger.conf':
+    enable: true
+    dst: data/serialinstruments/seriallogger.conf
+  'rsync://sr-serial1.ucsd.edu/SerialInstruments/{{ cruise.id }}/':
+    enable: true
+    dst: data/serialinstruments/
+  # XBT (Turo)
+  'rsync://sr-xbt.ucsd.edu/xbt-data/{{ cruise.id }}/':
+    enable: true
+    dst: data/xbt/data/
+  'rsync://sr-xbt.ucsd.edu/xbt-docs/*.pdf':
+    enable: true
+    dst: data/xbt/docs/
+  # WAMOS
+  'rsync://sr-wamos-acq.ucsd.edu/data/RESULTS':
+    enable: false
+    dst: data/wamos/
+    filter_date: '/%Y/%m/%d/'
+  'rsync://sr-wamos-raid.ucsd.edu/data/POLAR':
+    enable: false  # ~200GB/day; typically disabled
+    dst: data/wamos/
+    filter_date: '/%Y/%m/%d/'
+  'rsync://sr-wamos-acq.ucsd.edu/data/RESULTS/timeseries/':
+    enable: true  # Small monthly files. MPEK: peak, MPAR: avg
+    dst: data/wamos/timeseries/
+    filter_date: '/%Y%m/*{MPEK,MPAR}*%Y%m*.txt'
+...

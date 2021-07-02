@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+
+'''usage: %prog [options]
+
+Build series of rsync CLI commands per the Acqsync class.
+This tool is used to sync data acquisition directories to shared
+storage, and is the main warpper for executing.
+
+EXAMPLE DRY RUN:
+./bin/syncdas --dry-run \
+        -L /tmp/acqsync.log \
+        -P /tmp/acqsync.pid \
+        -T etc/acqsync.example.yaml
+'''
+# CHANGELOG
+# 2021-06:jmeyer: Standalone execution wrapper; logic to lib
+
+import os
+import sys
+try:
+    from dassync import DASSync
+except (ModuleNotFoundError, NameError):
+    # Append our path with this repo's lib dir
+    sys.path.append(
+        os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                     '../lib/python3/dist-packages')))
+    from dassync import DASSync
+
+
+def main():
+    '''entry point when run from commandline'''
+    sync = DASSync()
+
+    # Execute different methods based on configured state
+    if sync.conf.build_only is True:
+        sync.log_built_jobs()
+    elif sync.conf.cruise.sync_run is False:
+        sync.log_disabled()
+    else:
+        sync.run_syncs()
+
+
+if __name__ == "__main__":
+    main()

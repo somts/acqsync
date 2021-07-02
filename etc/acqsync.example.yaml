@@ -1,0 +1,70 @@
+# This file serves as an example file that can be copied to
+# acqsync.yaml as the basis for getting started.  It can also
+# be handed as an argument to bin/acsqync to test function.
+# The outcome will be copying /dev/null to /tmp a few times as
+# well as generating several errors.
+# NOTE: quoted strings can be expanded using Jinja2 syntax. This
+#       allows for minor editing of the cruise module to affect
+#       where data is copied from/to.
+---
+configuration:
+  cruise:
+    begin: 2020-12-26  # ISO format date
+    end: 2021-01-07    # ISO format date
+    id: XXport
+    operator: University of Best Operator Ever
+    ports: ['Anytown, USA', 'Nowheresville, CA']
+    sync_run: true     # false to disable sync of all items
+    vessel: R/V Example Vessel
+  paths:
+    dstbase: '/tmp/{{ cruise.id }}'
+    pid: /tmp/acqsync.pid
+    log: '/var/tmp/acqsync.{{ cruise.id }}.log'
+  rsync:
+    path: /usr/bin/rsync
+    # Options will expand to rsync command-line options.
+    # NOTE: only long options, EG --option (not -o), are supported.
+    #       See `man rsync` for details
+    # Behavior depends on data type:
+    #   Boolean         : --key (on true)
+    #   Array/List      : --key="arr[0]" [--key="arr[1]" --key="arr[2]" etc]
+    #   String/Int/Float: --key="value"
+    options:
+      recursive: true
+      links: true
+      times: true
+      specials: true
+      chmod: 'Dg+st,ugo+rx,Fo-w,+X'
+      exclude-from: '{{ paths.etc }}/exclude-from.example.txt'
+      human-readable: true
+      one-file-system: true
+      stats: true
+      timeout: 60
+items:  # items that python will create rsync-in-a-shell threads for.
+  '/dev/null':  # src inherited from module name; must be unique
+    enable: true
+    dst: '{{ cruise.id }}_{{cruise.begin }}-{{ cruise.end }}'
+    options: {fake-super: true}
+  foo:
+    enable: true
+    src: '/dev/null'
+    dst: '.'
+    options: {fake-super: true}
+  bar:
+    enable: false
+    src: '/dev/null'
+    dst: '{{ cruise.id }}_bar'
+    options: {fake-super: true}
+  baz:
+    # implicit enable
+    src: '/dev/null'
+    dst: /tmp/baz
+    options: {exclude: baz/, fake-super: true}
+  '{{ paths.logfile }}':
+    dst: 'meta/DASSync.log.txt'
+  '{{ paths.yamlfile }}':
+    dst: '/tmp/{{ cruise.id }}/meta/DASSync.yaml'
+  /var/tmp/:
+    filter_date: 'filetest_%Y-%m-%d.txt'
+    dst: 'myinstrument/data/'
+...

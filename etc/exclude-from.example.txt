@@ -1,0 +1,5 @@
+.DS_Store
+.TemporaryItems/
+.Trash*/
+._*
+Thumbs.db
