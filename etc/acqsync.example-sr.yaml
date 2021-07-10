@@ -9,8 +9,8 @@ configuration:
     sync_run: true     # false to disable sync of all items
     vessel: R/V Sally Ride
   paths:
-    dstbase: '/share/cruise/acqsync_testing/{{ cruise.id }}'
-    log: '/share/cruise/acqsync_testing/{{ cruise.id }}/meta/acqsync.log'
+    dstbase: '/share/cruise/{{ cruise.id }}'
+    log: '/share/cruise/{{ cruise.id }}/meta/acqsync.log'
     pid: /var/tmp/acqsync.pid
   rsync:
     path: /usr/bin/rsync
@@ -24,7 +24,7 @@ configuration:
     options:
       chmod: 'Dg+st,ugo+rx,Fo-w,+X'
       contimeout: 10
-      exclude: [.DS_Store, .TemporaryItems/, .Trash*/, ._*, Thumbs.db]
+      exclude: [.DS_Store, .TemporaryItems/, .Trash*/, ._*, Thumbs.db, $RECYCLE.BIN/, System*Volume*Information]
       human-readable: true
       links: true
       one-file-system: true
@@ -67,7 +67,7 @@ items:
     dst: data/adcp_ec150/
   # BGM-3
   'rsync://sr-gravity-bgm3.ucsd.edu/data/':
-    enable: true
+    enable: false
     dst: data/gravity/
     filter_date: '/logs/%Y%m%d*'
     options:
@@ -102,29 +102,38 @@ items:
         - '+ Seapoint/'
         - '+ Wetlabs/'
         - '- *'
-  # Please alter the source computer's "Manuals" dirname to "Seabird".
-  # Then, delete this module as the above will catch Seabird
-  'rsync://sr-ctd.ucsd.edu/manuals/Manuals/':
-    enable: true
-    dst: data/ctd/docs/Seabird/
   # Knudsen 3260 3.5/12kHz data.
-  'rsync://sr-echo.ucsd.edu/sgg_data/{{ cruise.id }}/':
+  'rsync://sr-echo-bak.ucsd.edu/sgg_data/echosounder3260/{{ cruise.id }}/':
     enable: true
     dst: data/echosounder-knudsen/3260/
-  'rsync://sr-echo.ucsd.edu/sgg_software/':
+  'rsync://sr-echo-bak.ucsd.edu/sgg_software/Knudsen3260postsurvey/':
     enable: true
     dst: software/echosounder-knudsen/
     options:
       filter: ['+ ConversionUtility.exe', '+ PostSurvey.exe', '- *']
   # SBP-29
-  'rsync://sr-echo-sbp.ucsd.edu/data/TOPAS_RAW':
+  'rsync://sr-echo-sbp.ucsd.edu/data/TOPAS_RAW/{{ cruise.id }}/':
     enable: true
-    dst: data/echosounder-sbp29/data/
-    filter_date: '/%Y%m%d*'
-  'rsync://sr-echo-sbp.ucsd.edu/data/SGY_Processed':
+    dst: data/echosounder-sbp29/data/TOPAS_RAW/
+  'rsync://sr-echo-sbp.ucsd.edu/data/SGY_Processed/{{ cruise.id }}/':
     enable: true
-    dst: data/echosounder-sbp29/data/
-    filter_date: '/%Y%m%d*'
+    dst: data/echosounder-sbp29/data/SGY_Processed/
+  # SBP29 ultraraw logs generate about 250GB/day; run only on request
+  'rsync://sr-echo-sbp.ucsd.edu/data/ultraraw_logs/{{ cruise.id }}/':
+    enable: true
+    dst: data/echosounder-sbp29/data/ultraraw_logs/
+  'rsync://sr-echo-sbp.ucsd.edu/data/logs/':
+    enable: true
+    dst: data/echosounder-sbp29/data/logs/
+  'rsync://sr-echo-sbp.ucsd.edu/data/TEMP/':
+    enable: true
+    dst: data/echosounder-sbp29/data/TEMP/
+  'rsync://sr-echo-sbp.ucsd.edu/data/screendumps/{{ cruise.id }}/':
+    enable: true
+    dst: data/echosounder-sbp29/data/screendumps/
+  'rsync://sr-echo-sbp.ucsd.edu/bist/BIST*':
+    enable: true
+    dst: data/echosounder-sbp29/bist/
   # EK80
   # NOTE: host sr-ek80-bak could be used if primary system is down
   'rsync://sr-ek80.ucsd.edu/data/{{ cruise.id }}/':
@@ -154,7 +163,7 @@ items:
     dst: data/multibeam-em124/pu_param/
   'rsync://sr-em124-sis.ucsd.edu/software/':
     enable: true
-    dst: data/multibeam-em124/software/
+    dst: software/multibeam-em124/
   'rsync://sr-em124-sis.ucsd.edu/user_settings/':
     enable: false
     dst: data/multibeam-em124/user_settings/
@@ -179,7 +188,7 @@ items:
     dst: data/multibeam-em712/pu_param/
   'rsync://sr-em712-sis.ucsd.edu/software/':
     enable: true
-    dst: data/multibeam-em712/software/
+    dst: software/multibeam-em712/
   'rsync://sr-em712-sis.ucsd.edu/user_settings/':
     enable: false
     dst: data/multibeam-em712/user_settings/
@@ -200,14 +209,9 @@ items:
     enable: false
     dst: data/magnetometer/bob/
   # MET
-  'rsync://sr-met.ucsd.edu/data/':
+  'rsync://sr-met.ucsd.edu/data/{{ cruise.id }}/':
     enable: true
-    dst: data/met/
-    options:
-      filter:
-        - '+ *.[Aa][Cc][Qq]'
-        - '+ /{{ cruise.id }}*/'
-        - '- *'
+    dst: data/met/data/
   'rsync://sr-met.ucsd.edu/manuals/':
     enable: true
     dst: data/met/docs/
@@ -279,5 +283,5 @@ items:
   'rsync://sr-wamos-acq.ucsd.edu/data/RESULTS/timeseries/':
     enable: true  # Small monthly files. MPEK: peak, MPAR: avg
     dst: data/wamos/timeseries/
-    filter_date: '/%Y%m/*{MPEK,MPAR}*%Y%m*.txt'
+    filter_date: '/%Y%m/*%Y%m.txt'
 ...
